@@ -25,6 +25,6 @@ router.post('/', entregaController.createEntrega);
 // Ruta para actualizar un envío existente
 router.put('/:id', entregaController.updateEntrega);
 
-// Ruta para eliminar un envío
-router["delete"]('/:id', entregaController.deleteEntrega);
+// Ruta para eliminar por IdInstitutoOK
+router["delete"]('/by-idinstituto/:IdInstitutoOK', entregaController.deleteEntregaByIdInstitutoOK);
 var _default = exports["default"] = router;

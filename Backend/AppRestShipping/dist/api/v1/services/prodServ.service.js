@@ -125,17 +125,19 @@ var EntregaService = /*#__PURE__*/function () {
         return _update.apply(this, arguments);
       }
       return update;
-    }()
+    }() // Eliminar un envío por IdInstitutoOK
   }, {
-    key: "delete",
+    key: "deleteByIdInstitutoOK",
     value: function () {
-      var _delete2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(entregaId) {
+      var _deleteByIdInstitutoOK = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(IdInstitutoOK) {
         return _regenerator["default"].wrap(function _callee5$(_context5) {
           while (1) switch (_context5.prev = _context5.next) {
             case 0:
               _context5.prev = 0;
               _context5.next = 3;
-              return _ProdServ["default"].findByIdAndRemove(entregaId);
+              return _ProdServ["default"].findOneAndDelete({
+                IdInstitutoOK: IdInstitutoOK
+              });
             case 3:
               return _context5.abrupt("return", _context5.sent);
             case 6:
@@ -148,10 +150,10 @@ var EntregaService = /*#__PURE__*/function () {
           }
         }, _callee5, null, [[0, 6]]);
       }));
-      function _delete(_x5) {
-        return _delete2.apply(this, arguments);
+      function deleteByIdInstitutoOK(_x5) {
+        return _deleteByIdInstitutoOK.apply(this, arguments);
       }
-      return _delete;
+      return deleteByIdInstitutoOK;
     }()
   }]);
 }();

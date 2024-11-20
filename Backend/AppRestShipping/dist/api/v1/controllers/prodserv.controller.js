@@ -4,7 +4,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateEntrega = exports.getEntregaById = exports.getAllEntregas = exports.deleteEntrega = exports.createEntrega = void 0;
+exports.updateEntrega = exports.getEntregaById = exports.getAllEntregas = exports.deleteEntregaByIdInstitutoOK = exports.createEntrega = void 0;
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _prodServ = _interopRequireDefault(require("../services/prodServ.service"));
@@ -159,17 +159,17 @@ var updateEntrega = exports.updateEntrega = /*#__PURE__*/function () {
   };
 }();
 
-// Eliminar un envío
-var deleteEntrega = exports.deleteEntrega = /*#__PURE__*/function () {
+// Eliminar un envío por IdInstitutoOK
+var deleteEntregaByIdInstitutoOK = exports.deleteEntregaByIdInstitutoOK = /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res, next) {
-    var id, deletedEntrega;
+    var IdInstitutoOK, deletedEntrega;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
           _context5.prev = 0;
-          id = req.params.id;
+          IdInstitutoOK = req.params.IdInstitutoOK;
           _context5.next = 4;
-          return _prodServ["default"]["delete"](id);
+          return _prodServ["default"].deleteByIdInstitutoOK(IdInstitutoOK);
         case 4:
           deletedEntrega = _context5.sent;
           if (deletedEntrega) {
@@ -181,12 +181,13 @@ var deleteEntrega = exports.deleteEntrega = /*#__PURE__*/function () {
           }));
         case 7:
           return _context5.abrupt("return", res.status(200).json({
-            message: 'Envío eliminado exitosamente.'
+            message: 'Envío eliminado exitosamente.',
+            deletedEntrega: deletedEntrega
           }));
         case 10:
           _context5.prev = 10;
           _context5.t0 = _context5["catch"](0);
-          console.error('Error en deleteEntrega:', _context5.t0);
+          console.error('Error en deleteEntregaByIdInstitutoOK:', _context5.t0);
           next(_boom["default"].internal(_context5.t0.message));
         case 14:
         case "end":
@@ -194,7 +195,7 @@ var deleteEntrega = exports.deleteEntrega = /*#__PURE__*/function () {
       }
     }, _callee5, null, [[0, 10]]);
   }));
-  return function deleteEntrega(_x13, _x14, _x15) {
+  return function deleteEntregaByIdInstitutoOK(_x13, _x14, _x15) {
     return _ref5.apply(this, arguments);
   };
 }();
