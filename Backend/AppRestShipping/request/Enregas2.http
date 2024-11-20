@@ -1,0 +1,8 @@
+@api = http://localhost:3020/api/v1/entregas/
+
+GET http://localhost:3020/api/v1/entregas/paqueterias/resumen
+
+###
+GET http://localhost:3020/api/v1/entrega/info-ad/9100
+###
+GET {{{api}}}/

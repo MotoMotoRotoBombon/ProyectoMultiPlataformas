@@ -4,7 +4,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateEntrega = exports.getEntregaById = exports.getAllEntregas = exports.deleteEntregaByIdInstitutoOK = exports.createEntrega = void 0;
+exports.updateEntrega = exports.getSeguimientoByEntregaId = exports.getResumenPorPaqueteria = exports.getProductosByEntregaId = exports.getInfoAdByIdInstituto = exports.getEntregasByFecha = exports.getEntregaById = exports.getAllEntregas = exports.deleteEntregaByIdInstitutoOK = exports.createEntrega = void 0;
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _prodServ = _interopRequireDefault(require("../services/prodServ.service"));
@@ -197,5 +197,233 @@ var deleteEntregaByIdInstitutoOK = exports.deleteEntregaByIdInstitutoOK = /*#__P
   }));
   return function deleteEntregaByIdInstitutoOK(_x13, _x14, _x15) {
     return _ref5.apply(this, arguments);
+  };
+}();
+
+//Devuelve un resumen de envíos agrupados por IdPaqueteriaOK.
+var getResumenPorPaqueteria = exports.getResumenPorPaqueteria = /*#__PURE__*/function () {
+  var _ref6 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res, next) {
+    var resumen;
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.prev = 0;
+          _context6.next = 3;
+          return Entrega.aggregate([{
+            $unwind: "$envios"
+          }, {
+            $group: {
+              _id: "$envios.IdPaqueteriaOK",
+              TotalEnvios: {
+                $sum: 1
+              },
+              CostoTotal: {
+                $sum: "$envios.CostoEnvio"
+              }
+            }
+          }, {
+            $project: {
+              Paqueteria: "$_id",
+              TotalEnvios: 1,
+              CostoTotal: 1,
+              _id: 0
+            }
+          }]);
+        case 3:
+          resumen = _context6.sent;
+          res.status(200).json(resumen);
+          _context6.next = 11;
+          break;
+        case 7:
+          _context6.prev = 7;
+          _context6.t0 = _context6["catch"](0);
+          console.error("Error al obtener el resumen por paquetería:", _context6.t0);
+          next(_context6.t0);
+        case 11:
+        case "end":
+          return _context6.stop();
+      }
+    }, _callee6, null, [[0, 7]]);
+  }));
+  return function getResumenPorPaqueteria(_x16, _x17, _x18) {
+    return _ref6.apply(this, arguments);
+  };
+}();
+
+//Devuelve toda la información adicional (info_ad) asociada a un IdInstitutoOK.
+var getInfoAdByIdInstituto = exports.getInfoAdByIdInstituto = /*#__PURE__*/function () {
+  var _ref7 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res, next) {
+    var idInstitutoOK, infoAd;
+    return _regenerator["default"].wrap(function _callee7$(_context7) {
+      while (1) switch (_context7.prev = _context7.next) {
+        case 0:
+          _context7.prev = 0;
+          idInstitutoOK = req.params.idInstitutoOK;
+          _context7.next = 4;
+          return Entrega.findOne({
+            IdInstitutoOK: idInstitutoOK
+          }, {
+            info_ad: 1,
+            _id: 0
+          });
+        case 4:
+          infoAd = _context7.sent;
+          if (infoAd) {
+            _context7.next = 7;
+            break;
+          }
+          return _context7.abrupt("return", res.status(404).json({
+            message: "Información no encontrada para el instituto proporcionado."
+          }));
+        case 7:
+          res.status(200).json(infoAd.info_ad);
+          _context7.next = 14;
+          break;
+        case 10:
+          _context7.prev = 10;
+          _context7.t0 = _context7["catch"](0);
+          console.error("Error al obtener información adicional:", _context7.t0);
+          next(_context7.t0);
+        case 14:
+        case "end":
+          return _context7.stop();
+      }
+    }, _callee7, null, [[0, 10]]);
+  }));
+  return function getInfoAdByIdInstituto(_x19, _x20, _x21) {
+    return _ref7.apply(this, arguments);
+  };
+}();
+
+//Devuelve los envíos realizados dentro de un rango de fechas.
+var getEntregasByFecha = exports.getEntregasByFecha = /*#__PURE__*/function () {
+  var _ref8 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee8(req, res, next) {
+    var _req$query, inicio, fin, envios;
+    return _regenerator["default"].wrap(function _callee8$(_context8) {
+      while (1) switch (_context8.prev = _context8.next) {
+        case 0:
+          _context8.prev = 0;
+          _req$query = req.query, inicio = _req$query.inicio, fin = _req$query.fin;
+          _context8.next = 4;
+          return Entrega.find({
+            "envios.info_ad.detail_row.detail_row_reg.FechaReg": {
+              $gte: new Date(inicio),
+              $lte: new Date(fin)
+            }
+          });
+        case 4:
+          envios = _context8.sent;
+          if (!(!envios || envios.length === 0)) {
+            _context8.next = 7;
+            break;
+          }
+          return _context8.abrupt("return", res.status(404).json({
+            message: "No se encontraron envíos en el rango de fechas especificado."
+          }));
+        case 7:
+          res.status(200).json(envios);
+          _context8.next = 14;
+          break;
+        case 10:
+          _context8.prev = 10;
+          _context8.t0 = _context8["catch"](0);
+          console.error("Error al obtener envíos por rango de fechas:", _context8.t0);
+          next(_context8.t0);
+        case 14:
+        case "end":
+          return _context8.stop();
+      }
+    }, _callee8, null, [[0, 10]]);
+  }));
+  return function getEntregasByFecha(_x22, _x23, _x24) {
+    return _ref8.apply(this, arguments);
+  };
+}();
+
+//Devuelve los productos asociados a un envío específico (IdEntregaOK).
+var getProductosByEntregaId = exports.getProductosByEntregaId = /*#__PURE__*/function () {
+  var _ref9 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee9(req, res, next) {
+    var id, entrega;
+    return _regenerator["default"].wrap(function _callee9$(_context9) {
+      while (1) switch (_context9.prev = _context9.next) {
+        case 0:
+          _context9.prev = 0;
+          id = req.params.id;
+          _context9.next = 4;
+          return Entrega.findOne({
+            "envios.IdEntregaOK": id
+          }, {
+            "envios.$.productos": 1
+          });
+        case 4:
+          entrega = _context9.sent;
+          if (entrega) {
+            _context9.next = 7;
+            break;
+          }
+          return _context9.abrupt("return", res.status(404).json({
+            message: "No se encontraron productos para el envío proporcionado."
+          }));
+        case 7:
+          res.status(200).json(entrega.envios[0].productos);
+          _context9.next = 14;
+          break;
+        case 10:
+          _context9.prev = 10;
+          _context9.t0 = _context9["catch"](0);
+          console.error("Error al obtener productos por IdEntregaOK:", _context9.t0);
+          next(_context9.t0);
+        case 14:
+        case "end":
+          return _context9.stop();
+      }
+    }, _callee9, null, [[0, 10]]);
+  }));
+  return function getProductosByEntregaId(_x25, _x26, _x27) {
+    return _ref9.apply(this, arguments);
+  };
+}();
+
+//Devuelve el historial de seguimiento de un envío específico (IdEntregaOK).
+var getSeguimientoByEntregaId = exports.getSeguimientoByEntregaId = /*#__PURE__*/function () {
+  var _ref10 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee10(req, res, next) {
+    var id, entrega;
+    return _regenerator["default"].wrap(function _callee10$(_context10) {
+      while (1) switch (_context10.prev = _context10.next) {
+        case 0:
+          _context10.prev = 0;
+          id = req.params.id;
+          _context10.next = 4;
+          return Entrega.findOne({
+            "envios.IdEntregaOK": id
+          }, {
+            "envios.$.rastreos.seguimiento": 1
+          });
+        case 4:
+          entrega = _context10.sent;
+          if (entrega) {
+            _context10.next = 7;
+            break;
+          }
+          return _context10.abrupt("return", res.status(404).json({
+            message: "No se encontró el seguimiento para el envío proporcionado."
+          }));
+        case 7:
+          res.status(200).json(entrega.envios[0].rastreos.seguimiento);
+          _context10.next = 14;
+          break;
+        case 10:
+          _context10.prev = 10;
+          _context10.t0 = _context10["catch"](0);
+          console.error("Error al obtener seguimiento por IdEntregaOK:", _context10.t0);
+          next(_context10.t0);
+        case 14:
+        case "end":
+          return _context10.stop();
+      }
+    }, _callee10, null, [[0, 10]]);
+  }));
+  return function getSeguimientoByEntregaId(_x28, _x29, _x30) {
+    return _ref10.apply(this, arguments);
   };
 }();

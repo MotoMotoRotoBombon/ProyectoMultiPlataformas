@@ -18,5 +18,20 @@ router.put('/:id', entregaController.updateEntrega);
 // Ruta para eliminar por IdInstitutoOK
 router.delete('/by-idinstituto/:IdInstitutoOK', entregaController.deleteEntregaByIdInstitutoOK);
 
+// Nueva ruta: Resumen por paquetería
+router.get("/paqueterias/resumen", entregaController.getResumenPorPaqueteria);
+
+// Nueva ruta: Información adicional por IdInstitutoOK
+router.get("/info-ad/:idInstitutoOK", entregaController.getInfoAdByIdInstituto);
+
+// Nueva ruta: Envíos dentro de un rango de fechas
+router.get("/fecha", entregaController.getEntregasByFecha);
+
+// Nueva ruta: Productos asociados a un envío
+router.get("/:id/envios/productos", entregaController.getProductosByEntregaId);
+
+// Nueva ruta: Seguimiento de un envío
+router.get("/:id/seguimiento", entregaController.getSeguimientoByEntregaId);
+
 
 export default router;

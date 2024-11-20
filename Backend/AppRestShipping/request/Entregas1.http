@@ -1,0 +1,229 @@
+@api = http://localhost:3020/api/v1/entregas/
+//POST ITEM 1 - Crear un nuevo envío
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "IdInstitutoOK": "9100",
+    "IdNegocioOK": "1200",
+    "IdEntregaOK": "9100-1200-333444555666",
+    "IdEntregaBK": "AP-1700",
+    "IdOrdenOK": "9100-abc123xyz456",
+    "info_ad": [
+        {
+            "IdEtiqueta": "IdFechaCreacion",
+            "Etiqueta": "Fecha de Creación",
+            "Valor": "2024-02-01T00:00:00.000Z",
+            "Secuencia": 1,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-01-31T10:00:00.000Z",
+                        "UsuarioReg": "adminUser"
+                    }
+                ]
+            }
+        }
+    ],
+    "envios": []
+}
+
+###POST ITEM 2 - Crear un envío con múltiples registros de info_ad
+POST {{api}}
+Content-Type: application/json
+
+{
+    "IdInstitutoOK": "9200",
+    "IdNegocioOK": "1300",
+    "IdEntregaOK": "9200-1300-777888999111",
+    "IdEntregaBK": "AP-1800",
+    "IdOrdenOK": "9200-order789xyz",
+    "info_ad": [
+        {
+            "IdEtiqueta": "IdFechaInicio",
+            "Etiqueta": "Fecha de Inicio",
+            "Valor": "2024-03-01T08:00:00.000Z",
+            "Secuencia": 1,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-02-28T18:00:00.000Z",
+                        "UsuarioReg": "systemBot"
+                    }
+                ]
+            }
+        },
+        {
+            "IdEtiqueta": "IdFechaFin",
+            "Etiqueta": "Fecha de Fin",
+            "Valor": "2024-03-05T18:00:00.000Z",
+            "Secuencia": 2,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-02-28T18:05:00.000Z",
+                        "UsuarioReg": "systemBot"
+                    }
+                ]
+            }
+        }
+    ],
+    "envios": []
+}
+
+###POST ITEM 3 - Crear un envío con múltiples destinos (envios)
+POST {{api}}
+Content-Type: application/json
+
+{
+    "IdInstitutoOK": "9300",
+    "IdNegocioOK": "1400",
+    "IdEntregaOK": "9300-1400-111222333444",
+    "IdEntregaBK": "AP-1900",
+    "IdOrdenOK": "9300-xyz999abc123",
+    "info_ad": [
+        {
+            "IdEtiqueta": "IdComentario",
+            "Etiqueta": "Comentario Adicional",
+            "Valor": "Entregar antes de las 12 PM",
+            "Secuencia": 1,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-02-15T12:00:00.000Z",
+                        "UsuarioReg": "systemUser"
+                    }
+                ]
+            }
+        }
+    ],
+    "envios": [
+        {
+            "IdDomicilioOK": "9300-123456789012-222333444",
+            "IdPaqueteriaOK": "9300-ups001",
+            "IdTipoMetodoEnvio": "IdTipoMetodoEnvio-IdStandard",
+            "CostoEnvio": 75,
+            "info_ad": [
+                {
+                    "IdEtiqueta": "IdCodigoPostal",
+                    "Etiqueta": "Código Postal",
+                    "Valor": "54000",
+                    "Secuencia": 1,
+                    "detail_row": {
+                        "Activo": "S",
+                        "Borrado": "N",
+                        "detail_row_reg": [
+                            {
+                                "FechaReg": "2024-02-15T12:10:00.000Z",
+                                "UsuarioReg": "systemUser"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "IdDomicilioOK": "9300-987654321098-555666777",
+            "IdPaqueteriaOK": "9300-dhl002",
+            "IdTipoMetodoEnvio": "IdTipoMetodoEnvio-IdEconomy",
+            "CostoEnvio": 50,
+            "info_ad": [
+                {
+                    "IdEtiqueta": "IdDireccionAlterna",
+                    "Etiqueta": "Dirección Alterna",
+                    "Valor": "Calle Secundaria #123",
+                    "Secuencia": 2,
+                    "detail_row": {
+                        "Activo": "S",
+                        "Borrado": "N",
+                        "detail_row_reg": [
+                            {
+                                "FechaReg": "2024-02-15T12:20:00.000Z",
+                                "UsuarioReg": "systemUser"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+###POST ITEM 4 - Crear un envío con solo información administrativa
+POST {{api}}
+Content-Type: application/json
+
+{
+    "IdInstitutoOK": "9400",
+    "IdNegocioOK": "1500",
+    "IdEntregaOK": "9400-1500-555666777888",
+    "IdEntregaBK": "AP-2000",
+    "IdOrdenOK": "9400-def456ghi789",
+    "info_ad": [
+        {
+            "IdEtiqueta": "IdSupervisor",
+            "Etiqueta": "Supervisor",
+            "Valor": "Maria Lopez",
+            "Secuencia": 1,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-02-20T12:00:00.000Z",
+                        "UsuarioReg": "adminBot"
+                    }
+                ]
+            }
+        }
+    ],
+    "envios": []
+}
+
+###OST ITEM 5 - Crear un envío con múltiples datos complejos
+POST {{api}}
+Content-Type: application/json
+
+{
+    "IdInstitutoOK": "9500",
+    "IdNegocioOK": "1600",
+    "IdEntregaOK": "9500-1600-888999000111",
+    "IdEntregaBK": "AP-2100",
+    "IdOrdenOK": "9500-ghi123jkl456",
+    "info_ad": [
+        {
+            "IdEtiqueta": "IdFechaEntrega",
+            "Etiqueta": "Fecha de Entrega",
+            "Valor": "2024-03-10T10:00:00.000Z",
+            "Secuencia": 1,
+            "detail_row": {
+                "Activo": "S",
+                "Borrado": "N",
+                "detail_row_reg": [
+                    {
+                        "FechaReg": "2024-02-25T10:10:00.000Z",
+                        "UsuarioReg": "systemAdmin"
+                    }
+                ]
+            }
+        }
+    ],
+    "envios": [
+        {
+            "IdDomicilioOK": "9500-098765432112-333444555",
+            "IdPaqueteriaOK": "9500-fedex002",
+            "IdTipoMetodoEnvio": "IdTipoMetodoEnvio-IdPremium",
+            "CostoEnvio": 150,
+            "info_ad": []
+        }
+    ]
+}
