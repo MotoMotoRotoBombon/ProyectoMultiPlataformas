@@ -15,59 +15,56 @@ import AdbIcon from '@mui/icons-material/Adb';
 //FIC: Add
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+
 const pages = ['Envios'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+
 function ResponsiveAppBar() {
-/* const ResponsiveAppBar=() => { */
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-  //+++++++++++++++++++++++++++++++++
-  //FIC: le agregamos el objeto e que se
-  //envia al hacer click en opcion del menu.  
+
   const handleCloseNavMenu = (e) => {
-    console.log(e.target.innerText);
-    //FIC: llamar funcion enviando e
     handleClickNavMenu(e);
     setAnchorElNav(null);
   };
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-    //+++++++++++++++++++++++++++++++++++++++++++++++
-    //FIC: Guardar el Estado de la Pagina Actual
-    const [myPages, setMyPages]= useState("");
-    //FIC: Clonar el objeto de navegacion (history).
-    const navigate = useNavigate();
-    //FIC: Actualizar el estado del useState de Paginas.
-    //cambiamos la opcion clickeada a mayusculas.
-    function handleClickNavMenu(e){
-        //console.log(e.target.innerText.toUpperCase());
-        setMyPages(e.target.innerText.toUpperCase());
+
+  //FIC: Guardar el Estado de la Pagina Actual
+  const [myPages, setMyPages] = useState("");
+  const navigate = useNavigate();
+
+  function handleClickNavMenu(e) {
+    setMyPages(e.target.innerText.toUpperCase());
+  }
+
+  useEffect(() => {
+    switch (myPages) {
+      case "": 
+        navigate("/");
+        break;
+      case "ENVIOS":
+        navigate("/shippings");
+        break;
     }
-  
-    //FIC: useEffect
-    useEffect(() => {
-      switch (myPages) {
-          case "":
-              navigate("/");
-              break;
-          case "ENVIOS":
-              navigate("/shippings");
-              break;
-      }
-  }, [myPages]); 
-    //-----------------------------------------------
+  }, [myPages]);
+
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: '#F28500' }}> {/* Fondo naranja */}
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          {/* Logo visible in medium and larger screens */}
           <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          
+          {/* Title visible in medium and larger screens */}
           <Typography
             variant="h6"
             noWrap
@@ -79,12 +76,14 @@ function ResponsiveAppBar() {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'black', // Texto negro
               textDecoration: 'none',
             }}
           >
-            LOGO
+            PAGINA PRINCIPAL
           </Typography>
+
+          {/* Hamburger menu for small screens */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -116,11 +115,15 @@ function ResponsiveAppBar() {
             >
               {pages.map((page) => (
                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+                  <Typography textAlign="center" sx={{ color: 'black' }}>
+                    {page}
+                  </Typography>
                 </MenuItem>
               ))}
             </Menu>
           </Box>
+
+          {/* Title for small screens */}
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant="h5"
@@ -134,31 +137,37 @@ function ResponsiveAppBar() {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'black', // Texto negro
               textDecoration: 'none',
             }}
           >
-            LOGO
+            PAGINA PRINCIPAL
           </Typography>
+
+          {/* Menu for larger screens */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
-                /* onClick={handleCloseNavMenu} */
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{
+                  my: 2,
+                  color: 'black', // Botones con letra negra
+                  display: 'block',
+                }}
               >
                 {page}
               </Button>
             ))}
           </Box>
-        
+
+          {/* Avatar and User menu */}
           <Box sx={{ flexGrow: 0 }}>
-        <Tooltip title="Open settings">
+            <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                   <Avatar alt="Remy Sharp" src="../../../../public/images/userDefault.png" />
+                <Avatar alt="Remy Sharp" src="../../../../public/images/icono.png" />
               </IconButton>
-        </Tooltip>
+            </Tooltip>
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"
@@ -177,7 +186,9 @@ function ResponsiveAppBar() {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+                  <Typography textAlign="center" sx={{ color: 'black' }}>
+                    {setting}
+                  </Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -187,4 +198,5 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
+
 export default ResponsiveAppBar;

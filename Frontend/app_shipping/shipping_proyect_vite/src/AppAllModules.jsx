@@ -7,6 +7,9 @@ import Footer from "./share/footer/components/Footer";
 import { useDispatch } from "react-redux";
 import { fetchShippingData } from "./redux/thunks";
 
+// Ruta del logo de Amazon
+import amazonLogo from "./assets/amazonblanco.png"; // Asegúrate de ajustar esta ruta
+
 export default function AppAllModules() {
   const dispatch = useDispatch();
 
@@ -17,13 +20,32 @@ export default function AppAllModules() {
 
   return (
     <>
-      <div id="div-app">
-        <h1>Main App - All Modules</h1>
+      <div
+        id="div-app"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#121212",
+        }}
+      >
+        {/* Logo de Amazon */}
+        <img
+          src={amazonLogo}
+          alt="Logo de Amazon"
+          style={{
+            height: "100px",
+            marginBottom: "2rem",
+          }}
+        />
 
         {/* Rutas principales controladas por el enrutador */}
         <RouterProvider router={SecurityRouter} />
 
-        <div id="div-footer">
+        {/* Footer fijo */}
+        <div id="div-footer" style={{ width: "100%" }}>
           <Footer />
         </div>
       </div>
