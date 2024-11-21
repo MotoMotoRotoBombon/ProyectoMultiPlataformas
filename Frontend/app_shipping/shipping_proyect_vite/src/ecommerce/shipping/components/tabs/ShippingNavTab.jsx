@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import React, { useState } from "react";
 
-const ShippingTabs = ["TABLA DE ENVÍOS", "INFO ADICIONAL", "PRODUCTOS"];
+const ShippingTabs = ["TABLA DE ENVÍOS", "INFO ADICIONAL", "PRODUCTOS", "ENVIOS", "RASTREO"];
 
 const ShippingNavTab = ({ setCurrentNameTabInShippingTab }) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);

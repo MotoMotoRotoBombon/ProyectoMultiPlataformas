@@ -3,14 +3,21 @@
 //Commerce
 #@api = http://187.229.22.99:8010/api/v1/prod-serv
 ###
-GET http://localhost:3020/api/v1/entregas/1001
+GET http://localhost:3020/api/v1/entregas/3001
 ### GET
-GET {{api}}info-ad
+GET {{api}}
 ###
-GET {{api}}1001/productos
+GET {{api}}1001
 
 ###
 GET http://localhost:3020/api/v1/entregas/envios/instituto/1001
 ###
+GET http://localhost:3020/api/v1/entregas/instituto/envios
+###
 GET http://localhost:3020/api/v1/entregas/rastreos/instituto/1001
+
+###
+GET http://localhost:3020/api/v1/entregas/instituto/rastreos
+###
+
 

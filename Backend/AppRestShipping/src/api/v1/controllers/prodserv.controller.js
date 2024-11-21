@@ -237,6 +237,33 @@ export const getEnviosByInstitutoWithId = async (req, res, next) => {
       next(error);
     }
   };
+
+// Obtener todos los envíos agrupados por IdInstitutoOK
+export const getAllEnvios = async (req, res, next) => {
+  try {
+    // Busca todos los registros en la base de datos
+    const registros = await Entrega.find({}, { IdInstitutoOK: 1, envios: 1 });
+
+    // Filtrar y estructurar la respuesta para cumplir con el formato solicitado
+    const resultado = registros.map((registro) => ({
+      IdInstitutoOK: registro.IdInstitutoOK,
+      envios: registro.envios.map((envio) => ({
+        IdDomicilioOK: envio.IdDomicilioOK,
+        IdPaqueteriaOK: envio.IdPaqueteriaOK,
+        IdTipoMetodoEnvio: envio.IdTipoMetodoEnvio,
+        CostoEnvio: envio.CostoEnvio,
+      })),
+    }));
+
+    // Retornar la respuesta estructurada
+    return res.status(200).json(resultado);
+  } catch (error) {
+    console.error("Error al obtener todos los envíos:", error);
+    next(error);
+  }
+};
+
+
   
   // Obtener rastreos con el IdInstitutoOK en el nivel superior
 export const getRastreosByInstituto = async (req, res, next) => {
@@ -271,6 +298,34 @@ export const getRastreosByInstituto = async (req, res, next) => {
       next(error);
     }
   };
+
+  // Obtener todos los rastreos de todos los institutos
+export const getAllRastreos = async (req, res, next) => {
+  try {
+    // Buscar todos los registros que contengan rastreos
+    const envios = await Entrega.find(
+      { "envios.rastreos": { $exists: true } }, // Filtra registros que tengan rastreos
+      {
+        IdInstitutoOK: 1, // Incluye IdInstitutoOK
+        "envios.rastreos": 1, // Incluye solo los rastreos dentro de envios
+      }
+    );
+
+    // Formatear la respuesta para incluir IdInstitutoOK y los rastreos
+    const rastreosData = envios.map((entrega) => ({
+      IdInstitutoOK: entrega.IdInstitutoOK,
+      rastreos: entrega.envios
+        .filter((envio) => envio.rastreos) // Filtra envíos que tengan rastreos
+        .map((envio) => envio.rastreos), // Obtén solo los rastreos
+    }));
+
+    res.status(200).json(rastreosData);
+  } catch (error) {
+    console.error("Error al obtener todos los rastreos:", error);
+    next(error);
+  }
+};
+
   
 
 

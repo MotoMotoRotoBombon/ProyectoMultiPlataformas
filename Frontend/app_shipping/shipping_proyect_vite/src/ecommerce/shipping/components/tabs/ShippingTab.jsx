@@ -4,6 +4,8 @@ import ShippingNavTab from "../tabs/ShippingNavTab";
 import InfoAdTab from "../tables/InfoAdTable";
 import ProductTable from "../tables/ProductTable";
 import ShippingsTable from "../tables/ShippingsTable";
+import EnviosTable from "../tables/EnviosTable";
+import RastreoTable from "../tables/RastreoTable";
 
 export default function ShippingTab() {
   const [currentNameTabInShippingTab, setCurrentNameTabInShippingTab] = useState("TABLA DE ENVÍOS");
@@ -23,6 +25,8 @@ export default function ShippingTab() {
       {currentNameTabInShippingTab === "TABLA DE ENVÍOS" && <ShippingsTable key={reloadShippings} />}
       {currentNameTabInShippingTab === "INFO ADICIONAL" && <InfoAdTab />}
       {currentNameTabInShippingTab === "PRODUCTOS" && <ProductTable />}
+      {currentNameTabInShippingTab === "ENVIOS" && <EnviosTable />}
+      {currentNameTabInShippingTab === "RASTREO" && <RastreoTable />}
     </Box>
   );
 }

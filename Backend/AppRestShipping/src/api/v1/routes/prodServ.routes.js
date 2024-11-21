@@ -38,8 +38,15 @@ router.get("/:IdInstitutoOK", entregaController.getEntregasByInstituto);
 // Nueva ruta: Obtener envíos con el IdInstitutoOK
 router.get("/envios/instituto/:IdInstitutoOK", entregaController.getEnviosByInstitutoWithId);
 
+// Nueva ruta: Obtener todos los envíos
+router.get("/instituto/envios", entregaController.getAllEnvios);
+
 // Nueva ruta: Obtener rastreos con el IdInstitutoOK
 router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosByInstituto);
+
+// Nueva ruta: Obtener todos los rastreos
+router.get("/instituto/rastreos", entregaController.getAllRastreos);
+
 
 
 

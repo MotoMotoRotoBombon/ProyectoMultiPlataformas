@@ -4,6 +4,8 @@ import ShippingNavTab from "../components/tabs/ShippingNavTab";
 import InfoAdTable from "../components/tables/InfoAdTable";
 import ProductTable from "../components/tables/ProductTable";
 import ShippingsTable from "../components/tables/ShippingsTable";
+import EnviosTable from "../components/tables/EnviosTable";
+import RastreoTable from "../components/tables/RastreoTable";
 import { getAllShippings } from "../services/remote/get/GetAllShippings";
 
 export default function Shippings() {
@@ -38,6 +40,8 @@ export default function Shippings() {
       {!loading && currentTab === "TABLA DE ENVÍOS" && <ShippingsTable data={shippingsData} />}
       {!loading && currentTab === "INFO ADICIONAL" && <InfoAdTable data={shippingsData.map((d) => d.info_ad).flat()} />}
       {!loading && currentTab === "PRODUCTOS" && <ProductTable data={shippingsData.map((d) => d.envios).flat()} />}
+      {!loading && currentTab === "ENVIOS" && <EnviosTable data={shippingsData.map((d) => d.envios).flat()} />}
+      {!loading && currentTab === "RASTREO" && <RastreoTable data={shippingsData.map((d) => d.envios).flat()} />}
     </Box>
   );
 }
