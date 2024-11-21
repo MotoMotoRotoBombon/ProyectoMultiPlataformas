@@ -7,6 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
 import EditShippingModal from "../modals/EditShippingModal";
+import { deleteShipping } from "../../services/remote/del/DeleteShipping"; // Importar servicio
 
 const ShippingColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
@@ -27,17 +28,32 @@ const ShippingsTable = ({ data }) => {
     setShippingsData((prevData) => [...prevData, newShipping]);
   };
 
-  const handleDeleteShipping = () => {
+  const handleDeleteShipping = async () => { //ACTUALIZADO
     if (!selectedRow) {
       alert("Por favor, selecciona una fila antes de eliminar.");
       return;
     }
 
-    setShippingsData((prevData) =>
-      prevData.filter((shipping) => shipping.IdInstitutoOK !== selectedRow.IdInstitutoOK)
-    );
-    setSelectedRow(null); // Limpia la selección después de eliminar
-    setIsDeleteModalOpen(false); // Cierra el modal de eliminación si está abierto
+    const { IdInstitutoOK } = selectedRow;
+
+    try {
+      // Llama al servicio para eliminar el envío
+      await deleteShipping(IdInstitutoOK);
+
+      // Actualiza el estado local si la eliminación fue exitosa
+      setShippingsData((prevData) =>
+        prevData.filter((shipping) => shipping.IdInstitutoOK !== IdInstitutoOK)
+      );
+
+      setSelectedRow(null); // Limpia la selección después de eliminar
+      setIsDeleteModalOpen(false); // Cierra el modal de eliminación
+      alert("Envío eliminado correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar el envío:", error);
+      alert(
+        error.response?.data?.message || "Ocurrió un error al eliminar el envío."
+      );
+    }
   };
 
   const handleEdit = (updatedShipping) => {
@@ -70,6 +86,7 @@ const ShippingsTable = ({ data }) => {
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onDeleteShipping={handleDeleteShipping}
+        selectedRow={selectedRow}
       />
 
       {/* Modal para editar */}
@@ -108,7 +125,7 @@ const ShippingsTable = ({ data }) => {
             <Tooltip title="Eliminar Envío">
               <IconButton
                 color="error"
-                onClick={handleDeleteShipping} // Elimina directamente al presionar
+                onClick={() => setIsDeleteModalOpen(true)}
                 disabled={!selectedRow} // Deshabilitar si no hay fila seleccionada
               >
                 <DeleteIcon />
@@ -131,4 +148,3 @@ const ShippingsTable = ({ data }) => {
 };
 
 export default ShippingsTable;
-

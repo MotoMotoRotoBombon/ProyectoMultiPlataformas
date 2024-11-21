@@ -1,22 +1,14 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Modal,
-  Typography,
-  Button,
-  TextField,
-  Stack,
-} from "@mui/material";
+import React from "react";
+import { Box, Modal, Typography, Button, Stack } from "@mui/material";
 
-const DeleteShippingModal = ({ open, onClose, onDeleteShipping }) => {
-  const [IdInstitutoOK, setIdInstitutoOK] = useState("");
-
+const DeleteShippingModal = ({ open, onClose, onDeleteShipping, selectedRow }) => { //ACTUALIZADO
   const handleDelete = () => {
-    if (IdInstitutoOK.trim()) {
-      onDeleteShipping(IdInstitutoOK); // Llama la función de eliminación
-      setIdInstitutoOK(""); // Limpia el campo
-      onClose(); // Cierra el modal
+    if (!selectedRow) {
+      alert("Por favor, selecciona un envío para eliminar.");
+      return;
     }
+    onDeleteShipping(); // Llama a la función de eliminación directamente
+    onClose();
   };
 
   return (
@@ -38,16 +30,8 @@ const DeleteShippingModal = ({ open, onClose, onDeleteShipping }) => {
           Eliminar Envío
         </Typography>
         <Typography variant="body1" mb={2}>
-          Ingresa el <strong>IdInstitutoOK</strong> del envío que deseas eliminar.
+          ¿Estás seguro de que deseas eliminar el envío con ID: <strong>{selectedRow?.IdInstitutoOK}</strong>?
         </Typography>
-        <TextField
-          fullWidth
-          label="IdInstitutoOK"
-          value={IdInstitutoOK}
-          onChange={(e) => setIdInstitutoOK(e.target.value)}
-          variant="outlined"
-          margin="normal"
-        />
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button variant="outlined" color="secondary" onClick={onClose}>
             Cancelar
@@ -56,7 +40,7 @@ const DeleteShippingModal = ({ open, onClose, onDeleteShipping }) => {
             variant="contained"
             color="error"
             onClick={handleDelete}
-            disabled={!IdInstitutoOK.trim()}
+            disabled={!selectedRow}
           >
             Eliminar
           </Button>
