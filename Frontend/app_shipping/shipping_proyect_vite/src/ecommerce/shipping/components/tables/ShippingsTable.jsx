@@ -3,8 +3,10 @@ import { MaterialReactTable } from "material-react-table";
 import { Box, Tooltip, IconButton, Stack } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
+import EditShippingModal from "../modals/EditShippingModal";
 
 const ShippingColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
@@ -18,30 +20,67 @@ const ShippingsTable = ({ data }) => {
   const [shippingsData, setShippingsData] = useState(data || []);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null); // Fila seleccionada
 
   const handleAddShipping = (newShipping) => {
     setShippingsData((prevData) => [...prevData, newShipping]);
   };
 
-  const handleDeleteShipping = (instituteId) => {
+  const handleDeleteShipping = () => {
+    if (!selectedRow) {
+      alert("Por favor, selecciona una fila antes de eliminar.");
+      return;
+    }
+
     setShippingsData((prevData) =>
-      prevData.filter((shipping) => shipping.IdInstitutoOK !== instituteId)
+      prevData.filter((shipping) => shipping.IdInstitutoOK !== selectedRow.IdInstitutoOK)
     );
+    setSelectedRow(null); // Limpia la selección después de eliminar
+    setIsDeleteModalOpen(false); // Cierra el modal de eliminación si está abierto
+  };
+
+  const handleEdit = (updatedShipping) => {
+    setShippingsData((prevData) =>
+      prevData.map((row) =>
+        row.IdInstitutoOK === updatedShipping.IdInstitutoOK
+          ? updatedShipping
+          : row
+      )
+    );
+    setIsEditModalOpen(false);
+  };
+
+  const rowSelectionHandler = (row) => {
+    console.log("Fila seleccionada:", row.original); // Debug para verificar datos
+    setSelectedRow(row.original); // Establecer todos los datos de la fila seleccionada
   };
 
   return (
     <Box>
+      {/* Modal para agregar */}
       <AddShippingModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddShipping={handleAddShipping}
       />
+
+      {/* Modal para eliminar */}
       <DeleteShippingModal
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onDeleteShipping={handleDeleteShipping}
       />
 
+      {/* Modal para editar */}
+      <EditShippingModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        envioData={selectedRow} // Pasar todos los datos de la fila seleccionada
+        onEdit={handleEdit}
+      />
+
+      {/* Tabla */}
       <MaterialReactTable
         columns={ShippingColumns}
         data={shippingsData}
@@ -49,6 +88,16 @@ const ShippingsTable = ({ data }) => {
           density: "compact",
           showGlobalFilter: true,
         }}
+        muiTableBodyRowProps={({ row }) => ({
+          onClick: () => rowSelectionHandler(row), // Manejar selección
+          style: {
+            backgroundColor:
+              selectedRow?.IdInstitutoOK === row.original.IdInstitutoOK
+                ? "#d1e7ff"
+                : "white", // Resaltar la fila seleccionada
+            cursor: "pointer",
+          },
+        })}
         renderTopToolbarCustomActions={() => (
           <Stack direction="row" spacing={2} sx={{ m: 1 }}>
             <Tooltip title="Agregar Envío">
@@ -57,8 +106,21 @@ const ShippingsTable = ({ data }) => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Eliminar Envío">
-              <IconButton color="error" onClick={() => setIsDeleteModalOpen(true)}>
+              <IconButton
+                color="error"
+                onClick={handleDeleteShipping} // Elimina directamente al presionar
+                disabled={!selectedRow} // Deshabilitar si no hay fila seleccionada
+              >
                 <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Editar Envío">
+              <IconButton
+                color="secondary"
+                onClick={() => setIsEditModalOpen(true)}
+                disabled={!selectedRow} // Deshabilitar si no hay fila seleccionada
+              >
+                <EditIcon />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -69,3 +131,4 @@ const ShippingsTable = ({ data }) => {
 };
 
 export default ShippingsTable;
+
