@@ -1,8 +1,16 @@
 @api = http://localhost:3020/api/v1/entregas/
 
-GET http://localhost:3020/api/v1/entregas/paqueterias/resumen
+//Commerce
+#@api = http://187.229.22.99:8010/api/v1/prod-serv
+###
+GET http://localhost:3020/api/v1/entregas/1001
+### GET
+GET {{api}}info-ad
+###
+GET {{api}}1001/productos
 
 ###
-GET http://localhost:3020/api/v1/entrega/info-ad/9100
+GET http://localhost:3020/api/v1/entregas/envios/instituto/1001
 ###
-GET {{{api}}}/
+GET http://localhost:3020/api/v1/entregas/rastreos/instituto/1001
+

@@ -1,4 +1,5 @@
 import entregaService from '../services/prodServ.service';
+import Entrega from '../models/ProdServ'; // Verifica que el path sea correcto
 import boom from '@hapi/boom';
 
 // Obtener lista de todos los envíos
@@ -15,7 +16,8 @@ export const getAllEntregas = async (req, res, next) => {
     }
 };
 
-// Obtener un envío específico por ID
+/* Obtener un envío específico por ID
+
 export const getEntregaById = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -28,7 +30,7 @@ export const getEntregaById = async (req, res, next) => {
         console.error('Error en getEntregaById:', error);
         next(boom.internal(error.message));
     }
-};
+}; */
 
 // Crear un nuevo envío
 export const createEntrega = async (req, res, next) => {
@@ -73,129 +75,209 @@ export const deleteEntregaByIdInstitutoOK = async (req, res, next) => {
       next(boom.internal(error.message));
     }  };
 
-//Devuelve un resumen de envíos agrupados por IdPaqueteriaOK.
-    export const getResumenPorPaqueteria = async (req, res, next) => {
-      try {
-          const resumen = await Entrega.aggregate([
-              {
-                  $unwind: "$envios"
-              },
-              {
-                  $group: {
-                      _id: "$envios.IdPaqueteriaOK",
-                      TotalEnvios: { $sum: 1 },
-                      CostoTotal: { $sum: "$envios.CostoEnvio" }
-                  }
-              },
-              {
-                  $project: {
-                      Paqueteria: "$_id",
-                      TotalEnvios: 1,
-                      CostoTotal: 1,
-                      _id: 0
-                  }
-              }
-          ]);
-          res.status(200).json(resumen);
-      } catch (error) {
-          console.error("Error al obtener el resumen por paquetería:", error);
-          next(error);
+
+    // Obtener la info_ad de un IdInstitutoOK
+export const getInfoAdByIdInstituto = async (req, res, next) => {
+    try {
+      const { idInstitutoOK } = req.params;
+      
+      // Buscar el registro por IdInstitutoOK
+      const entrega = await Entrega.findOne({ IdInstitutoOK: idInstitutoOK }, { IdInstitutoOK: 1, info_ad: 1 });
+      
+      if (!entrega) {
+        return res.status(404).json({ message: `No se encontró información para el IdInstitutoOK: ${idInstitutoOK}` });
       }
+  
+      // Retornar solo el IdInstitutoOK y la información de info_ad
+      return res.status(200).json({
+        IdInstitutoOK: entrega.IdInstitutoOK,
+        info_ad: entrega.info_ad,
+      });
+    } catch (error) {
+      console.error("Error al obtener la información adicional por IdInstitutoOK:", error);
+      next(error);
+    }
   };
 
-  //Devuelve toda la información adicional (info_ad) asociada a un IdInstitutoOK.
-  export const getInfoAdByIdInstituto = async (req, res, next) => {
+  // Obtener todas las ID del Instituto con su info_ad
+export const getAllInstitutesInfoAd = async (req, res, next) => {
+  try {
+    // Busca todas las entradas en la colección, pero solo selecciona los campos requeridos
+    const entregas = await Entrega.find({}, { IdInstitutoOK: 1, info_ad: 1 });
+
+    if (!entregas || entregas.length === 0) {
+      return res.status(404).json({ message: "No se encontró información de institutos." });
+    }
+
+    // Devuelve las ID del Instituto y su info_ad
+    return res.status(200).json(entregas);
+  } catch (error) {
+    console.error("Error al obtener la información de todos los institutos:", error);
+    next(error);
+  }
+};
+
+
+  // Obtener productos por IdInstitutoOK
+export const getProductosByInstituto = async (req, res, next) => {
+    const { IdInstitutoOK } = req.params;
     try {
-        const { idInstitutoOK } = req.params;
-        const infoAd = await Entrega.findOne(
-            { IdInstitutoOK: idInstitutoOK },
-            { info_ad: 1, _id: 0 }
-        );
-        if (!infoAd) {
-            return res.status(404).json({ message: "Información no encontrada para el instituto proporcionado." });
+        // Buscar todas las entregas asociadas al IdInstitutoOK
+        const entregas = await Entrega.find({ IdInstitutoOK });
+
+        // Si no hay entregas para el IdInstitutoOK, retorna un mensaje vacío
+        if (!entregas || entregas.length === 0) {
+            return res.status(404).json({
+                message: `No se encontraron entregas para el instituto: ${IdInstitutoOK}`,
+            });
         }
-        res.status(200).json(infoAd.info_ad);
+
+        // Extraer todos los productos asociados a los envíos
+        const productos = entregas.flatMap((entrega) =>
+            entrega.envios.flatMap((envio) => envio.productos)
+        );
+
+        // Si no hay productos, responde con un mensaje vacío
+        if (productos.length === 0) {
+            return res.status(404).json({
+                message: `No se encontraron productos para el instituto: ${IdInstitutoOK}`,
+            });
+        }
+
+        // Responder con la lista de productos
+        res.status(200).json({
+            IdInstitutoOK,
+            productos,
+        });
     } catch (error) {
-        console.error("Error al obtener información adicional:", error);
+        console.error("Error en getProductosByInstituto:", error);
         next(error);
     }
 };
 
-//Devuelve los envíos realizados dentro de un rango de fechas.
-export const getEntregasByFecha = async (req, res, next) => {
+// Controlador: Obtener todos los productos
+export const getAllProducts = async (req, res, next) => {
   try {
-      const { inicio, fin } = req.query;
-      const envios = await Entrega.find({
-          "envios.info_ad.detail_row.detail_row_reg.FechaReg": {
-              $gte: new Date(inicio),
-              $lte: new Date(fin)
-          }
-      });
-      if (!envios || envios.length === 0) {
-          return res.status(404).json({ message: "No se encontraron envíos en el rango de fechas especificado." });
-      }
-      res.status(200).json(envios);
+    const entregas = await Entrega.find({}, { IdInstitutoOK: 1, "envios.productos": 1 });
+    if (!entregas.length) {
+      return res.status(404).json({ message: "No se encontraron productos." });
+    }
+
+    const productosPorInstituto = entregas.map((entrega) => ({
+      IdInstitutoOK: entrega.IdInstitutoOK,
+      productos: entrega.envios.flatMap((envio) => envio.productos),
+    }));
+
+    return res.status(200).json(productosPorInstituto);
   } catch (error) {
-      console.error("Error al obtener envíos por rango de fechas:", error);
-      next(error);
+    console.error("Error al obtener todos los productos:", error);
+    next(error);
   }
 };
 
-//Devuelve los productos asociados a un envío específico (IdEntregaOK).
-export const getProductosByEntregaId = async (req, res, next) => {
-  try {
-      const { id } = req.params;
-      const entrega = await Entrega.findOne(
-          { "envios.IdEntregaOK": id },
-          { "envios.$.productos": 1 }
+// Obtener todas las entregas completas por IdInstitutoOK
+export const getEntregasByInstituto = async (req, res, next) => {
+    const { IdInstitutoOK } = req.params;
+
+    try {
+        // Buscar todas las entregas asociadas al IdInstitutoOK
+        const entregas = await Entrega.find({ IdInstitutoOK });
+
+        // Si no hay entregas para el IdInstitutoOK, retorna un mensaje vacío
+        if (!entregas || entregas.length === 0) {
+            return res.status(404).json({
+                message: `No se encontraron entregas para el instituto: ${IdInstitutoOK}`,
+            });
+        }
+
+        // Responder con todas las entregas completas
+        res.status(200).json({
+            IdInstitutoOK,
+            entregas,
+        });
+    } catch (error) {
+        console.error("Error en getEntregasByInstituto:", error);
+        next(error);
+    }
+};
+
+// Obtener envíos con el IdInstitutoOK en el nivel superior
+export const getEnviosByInstitutoWithId = async (req, res, next) => {
+    try {
+      const { IdInstitutoOK } = req.params;
+  
+      // Buscar el documento correspondiente al IdInstitutoOK
+      const data = await Entrega.findOne(
+        { IdInstitutoOK },
+        {
+          IdInstitutoOK: 1, // Incluir solo el IdInstitutoOK
+          "envios.IdDomicilioOK": 1,
+          "envios.IdPaqueteriaOK": 1,
+          "envios.IdTipoMetodoEnvio": 1,
+          "envios.CostoEnvio": 1,
+          _id: 0, // Excluir el campo _id del documento principal
+        }
       );
-      if (!entrega) {
-          return res.status(404).json({ message: "No se encontraron productos para el envío proporcionado." });
+  
+      if (!data) {
+        return res
+          .status(404)
+          .json({ message: `No se encontraron datos para el instituto ${IdInstitutoOK}.` });
       }
-      res.status(200).json(entrega.envios[0].productos);
-  } catch (error) {
-      console.error("Error al obtener productos por IdEntregaOK:", error);
+  
+      // Construir la respuesta con el formato requerido
+      const response = {
+        IdInstitutoOK: data.IdInstitutoOK,
+        envios: data.envios,
+      };
+  
+      return res.status(200).json(response);
+    } catch (error) {
+      console.error("Error en getEnviosByInstitutoWithId:", error);
       next(error);
-  }
-};
-
-//Devuelve el historial de seguimiento de un envío específico (IdEntregaOK).
-export const getSeguimientoByEntregaId = async (req, res, next) => {
-  try {
-      const { id } = req.params;
-      const entrega = await Entrega.findOne(
-          { "envios.IdEntregaOK": id },
-          { "envios.$.rastreos.seguimiento": 1 }
+    }
+  };
+  
+  // Obtener rastreos con el IdInstitutoOK en el nivel superior
+export const getRastreosByInstituto = async (req, res, next) => {
+    try {
+      const { IdInstitutoOK } = req.params;
+  
+      // Buscar el documento correspondiente al IdInstitutoOK
+      const data = await Entrega.findOne(
+        { IdInstitutoOK },
+        {
+          IdInstitutoOK: 1, // Incluir solo el IdInstitutoOK
+          "envios.rastreos": 1, // Incluir solo el campo rastreos dentro de envios
+          _id: 0, // Excluir el campo _id del documento principal
+        }
       );
-      if (!entrega) {
-          return res.status(404).json({ message: "No se encontró el seguimiento para el envío proporcionado." });
+  
+      if (!data) {
+        return res
+          .status(404)
+          .json({ message: `No se encontraron datos de rastreo para el instituto ${IdInstitutoOK}.` });
       }
-      res.status(200).json(entrega.envios[0].rastreos.seguimiento);
-  } catch (error) {
-      console.error("Error al obtener seguimiento por IdEntregaOK:", error);
+  
+      // Construir la respuesta con el formato requerido
+      const response = {
+        IdInstitutoOK: data.IdInstitutoOK,
+        rastreos: data.envios.map((envio) => envio.rastreos), // Extraer solo rastreos
+      };
+  
+      return res.status(200).json(response);
+    } catch (error) {
+      console.error("Error en getRastreosByInstituto:", error);
       next(error);
-  }
-};
-
-
-
-
+    }
+  };
+  
 
 
   
-    
+  
+  
 
-      
-      
-      
-      
-      
-      
-
-    
- 
 
   
 
-  
-  

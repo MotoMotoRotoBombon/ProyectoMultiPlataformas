@@ -6,8 +6,9 @@ const router = Router();
 // Ruta para obtener la lista de todos los envíos
 router.get('/', entregaController.getAllEntregas);
 
-// Ruta para obtener un envío específico por ID
-router.get('/:id', entregaController.getEntregaById);
+/* Ruta para obtener un envío específico por ID
+
+router.get('/:id', entregaController.getEntregaById); */
 
 // Ruta para crear un nuevo envío
 router.post('/', entregaController.createEntrega);
@@ -18,20 +19,35 @@ router.put('/:id', entregaController.updateEntrega);
 // Ruta para eliminar por IdInstitutoOK
 router.delete('/by-idinstituto/:IdInstitutoOK', entregaController.deleteEntregaByIdInstitutoOK);
 
-// Nueva ruta: Resumen por paquetería
-router.get("/paqueterias/resumen", entregaController.getResumenPorPaqueteria);
-
-// Nueva ruta: Información adicional por IdInstitutoOK
+// Nueva ruta: Obtener info_ad por IdInstitutoOK
 router.get("/info-ad/:idInstitutoOK", entregaController.getInfoAdByIdInstituto);
 
-// Nueva ruta: Envíos dentro de un rango de fechas
-router.get("/fecha", entregaController.getEntregasByFecha);
+// Nueva ruta: Obtener todas las IDs de Institutos con su info_ad
+router.get("/info-ad", entregaController.getAllInstitutesInfoAd);
 
-// Nueva ruta: Productos asociados a un envío
-router.get("/:id/envios/productos", entregaController.getProductosByEntregaId);
+// Nueva ruta: Obtener todos los productos
+router.get("/productos", entregaController.getAllProducts);
 
-// Nueva ruta: Seguimiento de un envío
-router.get("/:id/seguimiento", entregaController.getSeguimientoByEntregaId);
+// Nueva ruta: Obtener productos por IdInstitutoOK
+router.get("/:IdInstitutoOK/productos", entregaController.getProductosByInstituto);
+
+
+// Nueva ruta: Obtener todas las entregas completas por IdInstitutoOK
+router.get("/:IdInstitutoOK", entregaController.getEntregasByInstituto);
+
+// Nueva ruta: Obtener envíos con el IdInstitutoOK
+router.get("/envios/instituto/:IdInstitutoOK", entregaController.getEnviosByInstitutoWithId);
+
+// Nueva ruta: Obtener rastreos con el IdInstitutoOK
+router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosByInstituto);
+
+
+
+
+
+
+
+
 
 
 export default router;

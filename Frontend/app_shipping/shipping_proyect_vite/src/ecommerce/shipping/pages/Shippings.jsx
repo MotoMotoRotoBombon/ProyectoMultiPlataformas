@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import ShippingNavTab from "../components/tabs/ShippingNavTab";
 import InfoAdTable from "../components/tables/InfoAdTable";
-import AddressesTable from "../components/tables/AddressesTable";
+import ProductTable from "../components/tables/ProductTable";
 import ShippingsTable from "../components/tables/ShippingsTable";
 import { getAllShippings } from "../services/remote/get/GetAllShippings";
 
@@ -14,11 +14,13 @@ export default function Shippings() {
   useEffect(() => {
     async function fetchData() {
       try {
+        console.log("Cargando datos...");
         const data = await getAllShippings();
+        console.log("Datos cargados en Shippings.jsx:", data);
         setShippingsData(data);
-        setLoading(false);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
+      } finally {
         setLoading(false);
       }
     }
@@ -32,10 +34,10 @@ export default function Shippings() {
   return (
     <Box>
       <ShippingNavTab setCurrentNameTabInShippingTab={handleTabChange} />
-
-      {currentTab === "TABLA DE ENVÍOS" && <ShippingsTable />}
-      {currentTab === "INFO ADICIONAL" && <InfoAdTable data={shippingsData.map((d) => d.info_ad).flat()} />}
-      {currentTab === "DOMICILIOS" && <AddressesTable data={shippingsData.map((d) => d.envios).flat()} />}
+      {loading && <div>Cargando datos...</div>}
+      {!loading && currentTab === "TABLA DE ENVÍOS" && <ShippingsTable data={shippingsData} />}
+      {!loading && currentTab === "INFO ADICIONAL" && <InfoAdTable data={shippingsData.map((d) => d.info_ad).flat()} />}
+      {!loading && currentTab === "PRODUCTOS" && <ProductTable data={shippingsData.map((d) => d.envios).flat()} />}
     </Box>
   );
 }
