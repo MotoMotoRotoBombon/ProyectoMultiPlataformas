@@ -113,7 +113,7 @@ const InfoAdTable = () => {
             {/* Botón para cargar todos */}
             <Tooltip title="Cargar todos los registros">
               <IconButton color="primary" onClick={fetchAllInfoAd}>
-                <SearchIcon />
+                <PlaylistAddCheckIcon />
               </IconButton>
             </Tooltip>
 
@@ -123,7 +123,7 @@ const InfoAdTable = () => {
                 color="info"
                 onClick={() => setIsSearchModalOpen(true)}
               >
-                <PlaylistAddCheckIcon />
+                <SearchIcon />
               </IconButton>
             </Tooltip>
           </Stack>
