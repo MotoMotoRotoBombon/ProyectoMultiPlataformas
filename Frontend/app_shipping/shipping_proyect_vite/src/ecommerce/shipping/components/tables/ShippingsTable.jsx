@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MaterialReactTable } from "material-react-table";
 import { Box, Tooltip, IconButton, Stack } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
 import EditShippingModal from "../modals/EditShippingModal";
-import { deleteShipping } from "../../services/remote/del/DeleteShipping"; // Importar servicio
+import { deleteShipping } from "../../services/remote/del/DeleteShipping";
+import { getAllShippings } from "../../services/remote/get/GetAllShippings";
 
 const ShippingColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
@@ -17,18 +19,38 @@ const ShippingColumns = [
   { accessorKey: "IdOrdenOK", header: "Orden OK", size: 200 },
 ];
 
-const ShippingsTable = ({ data }) => {
-  const [shippingsData, setShippingsData] = useState(data || []);
+const ShippingsTable = () => {
+  const [shippingsData, setShippingsData] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null); // Fila seleccionada
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar datos desde el backend
+  const loadShippingsData = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllShippings();
+      setShippingsData(data);
+    } catch (error) {
+      console.error("Error al cargar los datos de envíos:", error);
+      alert("Error al cargar los datos. Por favor, intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    loadShippingsData();
+  }, []);
 
   const handleAddShipping = (newShipping) => {
     setShippingsData((prevData) => [...prevData, newShipping]);
   };
 
-  const handleDeleteShipping = async () => { //ACTUALIZADO
+  const handleDeleteShipping = async () => {
     if (!selectedRow) {
       alert("Por favor, selecciona una fila antes de eliminar.");
       return;
@@ -37,16 +59,12 @@ const ShippingsTable = ({ data }) => {
     const { IdInstitutoOK } = selectedRow;
 
     try {
-      // Llama al servicio para eliminar el envío
       await deleteShipping(IdInstitutoOK);
-
-      // Actualiza el estado local si la eliminación fue exitosa
       setShippingsData((prevData) =>
         prevData.filter((shipping) => shipping.IdInstitutoOK !== IdInstitutoOK)
       );
-
-      setSelectedRow(null); // Limpia la selección después de eliminar
-      setIsDeleteModalOpen(false); // Cierra el modal de eliminación
+      setSelectedRow(null);
+      setIsDeleteModalOpen(false);
       alert("Envío eliminado correctamente.");
     } catch (error) {
       console.error("Error al eliminar el envío:", error);
@@ -56,32 +74,41 @@ const ShippingsTable = ({ data }) => {
     }
   };
 
-  const handleEdit = (updatedShipping) => {
-    setShippingsData((prevData) =>
-      prevData.map((row) =>
-        row.IdInstitutoOK === updatedShipping.IdInstitutoOK
-          ? updatedShipping
-          : row
-      )
-    );
-    setIsEditModalOpen(false);
+  const handleEdit = async (updatedShipping) => {
+    try {
+      const updatedData = await updateShipping(
+        updatedShipping.IdInstitutoOK,
+        updatedShipping
+      );
+      setShippingsData((prevData) =>
+        prevData.map((row) =>
+          row.IdInstitutoOK === updatedData.IdInstitutoOK
+            ? updatedData
+            : row
+        )
+      );
+      setIsEditModalOpen(false);
+      alert("Envío actualizado correctamente.");
+    } catch (error) {
+      console.error("Error al actualizar el envío:", error);
+      alert(
+        error.response?.data?.message || "Ocurrió un error al actualizar el envío."
+      );
+    }
   };
 
   const rowSelectionHandler = (row) => {
-    console.log("Fila seleccionada:", row.original); // Debug para verificar datos
-    setSelectedRow(row.original); // Establecer todos los datos de la fila seleccionada
+    setSelectedRow(row.original);
   };
 
   return (
     <Box>
-      {/* Modal para agregar */}
       <AddShippingModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddShipping={handleAddShipping}
       />
 
-      {/* Modal para eliminar */}
       <DeleteShippingModal
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -89,29 +116,28 @@ const ShippingsTable = ({ data }) => {
         selectedRow={selectedRow}
       />
 
-      {/* Modal para editar */}
       <EditShippingModal
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        envioData={selectedRow} // Pasar todos los datos de la fila seleccionada
+        envioData={selectedRow}
         onEdit={handleEdit}
       />
 
-      {/* Tabla */}
       <MaterialReactTable
         columns={ShippingColumns}
         data={shippingsData}
+        state={{ isLoading: loading }}
         initialState={{
           density: "compact",
           showGlobalFilter: true,
         }}
         muiTableBodyRowProps={({ row }) => ({
-          onClick: () => rowSelectionHandler(row), // Manejar selección
+          onClick: () => rowSelectionHandler(row),
           style: {
             backgroundColor:
               selectedRow?.IdInstitutoOK === row.original.IdInstitutoOK
                 ? "#d1e7ff"
-                : "white", // Resaltar la fila seleccionada
+                : "white",
             cursor: "pointer",
           },
         })}
@@ -126,7 +152,7 @@ const ShippingsTable = ({ data }) => {
               <IconButton
                 color="error"
                 onClick={() => setIsDeleteModalOpen(true)}
-                disabled={!selectedRow} // Deshabilitar si no hay fila seleccionada
+                disabled={!selectedRow}
               >
                 <DeleteIcon />
               </IconButton>
@@ -135,9 +161,14 @@ const ShippingsTable = ({ data }) => {
               <IconButton
                 color="secondary"
                 onClick={() => setIsEditModalOpen(true)}
-                disabled={!selectedRow} // Deshabilitar si no hay fila seleccionada
+                disabled={!selectedRow}
               >
                 <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Actualizar Tabla">
+              <IconButton color="success" onClick={loadShippingsData}>
+                <RefreshIcon />
               </IconButton>
             </Tooltip>
           </Stack>
