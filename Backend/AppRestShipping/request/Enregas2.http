@@ -14,10 +14,21 @@ GET http://localhost:3020/api/v1/entregas/envios/instituto/1001
 ###
 GET http://localhost:3020/api/v1/entregas/instituto/envios
 ###
-GET http://localhost:3020/api/v1/entregas/rastreos/instituto/1001
+GET http://localhost:3020/api/v1/entregas/rastreos/instituto/2001
 
 ###
 GET http://localhost:3020/api/v1/entregas/instituto/rastreos
 ###
+POST http://localhost:3020/api/v1/entregas/info-adicional/2001
+Content-Type: application/json
+
+{
+  "Etiqueta": "Etiqueta de prueba",
+  "Valor": "Valor de prueba",
+  "Secuencia": 1,
+  "Activo": "S",
+  "FechaReg": "2024-11-25T12:00:00Z",
+  "UsuarioReg": "UsuarioDePrueba"
+}
 
 
