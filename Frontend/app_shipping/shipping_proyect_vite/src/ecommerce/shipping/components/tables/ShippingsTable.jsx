@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { MaterialReactTable } from "material-react-table";
-import { Box, Tooltip, IconButton, Stack } from "@mui/material";
+import {
+  Box,
+  Tooltip,
+  IconButton,
+  Stack,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -26,6 +34,7 @@ const ShippingsTable = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
 
   // Cargar datos desde el backend
   const loadShippingsData = async () => {
@@ -101,6 +110,43 @@ const ShippingsTable = () => {
     setSelectedRow(row.original);
   };
 
+  const handleContextMenu = (event, row) => {
+    event.preventDefault();
+    setSelectedRow(row.original); // Establecer la fila seleccionada
+    setContextMenu(
+      contextMenu === null
+        ? {
+            mouseX: event.clientX - 2,
+            mouseY: event.clientY - 4,
+          }
+        : null
+    );
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const handleAddInfoAdicional = () => {
+    alert(`Agregar Info Adicional para: ${selectedRow.IdInstitutoOK}`);
+    handleCloseContextMenu();
+  };
+
+  const handleAddProductos = () => {
+    alert(`Agregar Productos para: ${selectedRow.IdInstitutoOK}`);
+    handleCloseContextMenu();
+  };
+
+  const handleAddEnvios = () => {
+    alert(`Agregar Envíos para: ${selectedRow.IdInstitutoOK}`);
+    handleCloseContextMenu();
+  };
+
+  const handleAddRastreo = () => {
+    alert(`Agregar Rastreo para: ${selectedRow.IdInstitutoOK}`);
+    handleCloseContextMenu();
+  };
+
   return (
     <Box>
       <AddShippingModal
@@ -133,6 +179,7 @@ const ShippingsTable = () => {
         }}
         muiTableBodyRowProps={({ row }) => ({
           onClick: () => rowSelectionHandler(row),
+          onContextMenu: (e) => handleContextMenu(e, row),
           style: {
             backgroundColor:
               selectedRow?.IdInstitutoOK === row.original.IdInstitutoOK
@@ -174,6 +221,23 @@ const ShippingsTable = () => {
           </Stack>
         )}
       />
+
+      {/* Menú contextual */}
+      <Menu
+        open={contextMenu !== null}
+        onClose={handleCloseContextMenu}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={handleAddInfoAdicional}>Agregar Info Adicional</MenuItem>
+        <MenuItem onClick={handleAddProductos}>Agregar Productos</MenuItem>
+        <MenuItem onClick={handleAddEnvios}>Agregar Envíos</MenuItem>
+        <MenuItem onClick={handleAddRastreo}>Agregar Rastreo</MenuItem>
+      </Menu>
     </Box>
   );
 };

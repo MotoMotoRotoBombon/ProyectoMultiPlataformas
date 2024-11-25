@@ -1,6 +1,7 @@
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -9,6 +10,8 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _prodServ = _interopRequireDefault(require("../services/prodServ.service"));
 var _boom = _interopRequireDefault(require("@hapi/boom"));
+
+
 // Obtener lista de todos los envíos
 var getAllEntregas = exports.getAllEntregas = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(req, res, next) {
