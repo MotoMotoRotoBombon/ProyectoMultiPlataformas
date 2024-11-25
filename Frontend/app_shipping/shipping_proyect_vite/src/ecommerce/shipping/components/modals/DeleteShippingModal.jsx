@@ -34,7 +34,7 @@ const DeleteShippingModal = ({ open, onClose, onDeleteShipping, selectedRow }) =
             color: "red", // Cambiar color del título a rojo
           }}
         >
-          Eliminar Envío
+          Eliminar 
         </Typography>
 
         {/* Pregunta con letras negras */}
@@ -45,7 +45,7 @@ const DeleteShippingModal = ({ open, onClose, onDeleteShipping, selectedRow }) =
             color: "black", // Cambiar color del texto a negro
           }}
         >
-          ¿Estás seguro de que deseas eliminar el envío con ID: <strong>{selectedRow?.IdInstitutoOK}</strong>?
+          ¿Estás seguro de que deseas eliminar  ID: <strong>{selectedRow?.IdInstitutoOK}</strong>?
         </Typography>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">

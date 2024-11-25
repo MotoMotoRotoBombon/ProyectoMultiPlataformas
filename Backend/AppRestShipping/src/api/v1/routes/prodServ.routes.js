@@ -56,16 +56,7 @@ router.get("/info-ad", entregaController.getAllInstitutesInfoAd);
 // Ruta para agregar información adicional
 router.post("/info-adicional/:IdInstitutoOK", entregaController.addInfoAdicional);
 
-
-
-
-
-
-
-
-
-
-
-
+// Nueva ruta para eliminar info_ad por IdInstitutoOK
+router.delete( "/info-ad/:IdInstitutoOK", entregaController.deleteInfoAdByInstitute);
 
 export default router;

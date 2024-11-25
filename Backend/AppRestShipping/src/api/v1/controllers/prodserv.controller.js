@@ -378,3 +378,34 @@ export const addInfoAdicional = async (req, res, next) => {
   }
 };
 
+// Eliminar toda la información adicional por IdInstitutoOK
+export const deleteInfoAdByInstitute = async (req, res) => {
+  try {
+    const { IdInstitutoOK } = req.params;
+
+    // Buscar y actualizar el documento, eliminando la información adicional
+    const updatedEntrega = await Entrega.findOneAndUpdate(
+      { IdInstitutoOK },
+      { $set: { info_ad: [] } }, // Vaciar el array de info_ad
+      { new: true } // Retorna el documento actualizado
+    );
+
+    if (!updatedEntrega) {
+      return res.status(404).json({
+        message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Información adicional eliminada correctamente.",
+      updatedEntrega,
+    });
+  } catch (error) {
+    console.error("Error al eliminar información adicional:", error);
+    res.status(500).json({
+      message: "Error interno del servidor.",
+      error: error.message,
+    });
+  }
+};
+
