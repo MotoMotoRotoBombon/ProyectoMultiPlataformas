@@ -16,6 +16,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
 import EditShippingModal from "../modals/EditShippingModal";
+import AddInfoAdicional from "../modals/AddInfoAdicionalModal";
 import { deleteShipping } from "../../services/remote/del/DeleteShipping";
 import { getAllShippings } from "../../services/remote/get/GetAllShippings";
 
@@ -32,6 +33,7 @@ const ShippingsTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddInfoAdModalOpen, setIsAddInfoAdModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
@@ -128,7 +130,7 @@ const ShippingsTable = () => {
   };
 
   const handleAddInfoAdicional = () => {
-    alert(`Agregar Info Adicional para: ${selectedRow.IdInstitutoOK}`);
+    setIsAddInfoAdModalOpen(true);
     handleCloseContextMenu();
   };
 
@@ -167,6 +169,16 @@ const ShippingsTable = () => {
         onClose={() => setIsEditModalOpen(false)}
         envioData={selectedRow}
         onEdit={handleEdit}
+      />
+
+      <AddInfoAdicional
+        open={isAddInfoAdModalOpen}
+        onClose={() => setIsAddInfoAdModalOpen(false)}
+        IdInstitutoOK={selectedRow?.IdInstitutoOK}
+        onInfoAdAdded={(newInfoAd) => {
+          console.log("Información adicional agregada:", newInfoAd);
+          loadShippingsData(); // Recargar datos
+        }}
       />
 
       <MaterialReactTable
