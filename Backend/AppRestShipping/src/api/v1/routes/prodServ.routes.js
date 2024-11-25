@@ -1,6 +1,7 @@
 // Shipping
 import { Router } from 'express';
 import * as entregaController from '../controllers/prodserv.controller';
+import { validateRastreo } from "../middlewares/validateRastreo";
 const router = Router();
 
 // Ruta para obtener la lista de todos los envíos
@@ -47,6 +48,9 @@ router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosBy
 // Nueva ruta: Obtener todos los rastreos
 router.get("/instituto/rastreos", entregaController.getAllRastreos);
 
+router.get("/rastreos", entregaController.getAllRastreos);
+
+router.post('/rastreos', entregaController.createRastreo);
 //CRUD INFO 
 
 

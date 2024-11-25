@@ -7,7 +7,6 @@ import {
   Stack,
   Menu,
   MenuItem,
-  Typography,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -17,6 +16,7 @@ import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
 import EditShippingModal from "../modals/EditShippingModal";
 import AddInfoAdicional from "../modals/AddInfoAdicionalModal";
+import AddTrackingModal from "../modals/AddTrackingModal "; // Importar modal de rastreo
 import { deleteShipping } from "../../services/remote/del/DeleteShipping";
 import { getAllShippings } from "../../services/remote/get/GetAllShippings";
 
@@ -34,6 +34,7 @@ const ShippingsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddInfoAdModalOpen, setIsAddInfoAdModalOpen] = useState(false);
+  const [isAddTrackingModalOpen, setIsAddTrackingModalOpen] = useState(false); // Estado del modal de rastreo
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
@@ -108,6 +109,11 @@ const ShippingsTable = () => {
     }
   };
 
+  const handleAddTracking = (newTracking) => {
+    alert(`Nuevo rastreo agregado para el instituto ${selectedRow?.IdInstitutoOK}`);
+    loadShippingsData(); // Recargar datos para reflejar el nuevo rastreo
+  };
+
   const rowSelectionHandler = (row) => {
     setSelectedRow(row.original);
   };
@@ -145,7 +151,7 @@ const ShippingsTable = () => {
   };
 
   const handleAddRastreo = () => {
-    alert(`Agregar Rastreo para: ${selectedRow.IdInstitutoOK}`);
+    setIsAddTrackingModalOpen(true);
     handleCloseContextMenu();
   };
 
@@ -179,6 +185,13 @@ const ShippingsTable = () => {
           console.log("Información adicional agregada:", newInfoAd);
           loadShippingsData(); // Recargar datos
         }}
+      />
+
+      <AddTrackingModal
+        open={isAddTrackingModalOpen}
+        onClose={() => setIsAddTrackingModalOpen(false)}
+        onAddTracking={handleAddTracking}
+        instituteId={selectedRow?.IdInstitutoOK}
       />
 
       <MaterialReactTable

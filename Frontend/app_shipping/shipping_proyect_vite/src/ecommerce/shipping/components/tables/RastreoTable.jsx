@@ -11,56 +11,56 @@ const TrackingColumns = [
   { accessorKey: "IdRepartidorOK", header: "ID Repartidor", size: 200 },
   { accessorKey: "NombreRepartidor", header: "Nombre Repartidor", size: 200 },
   { accessorKey: "Alias", header: "Alias", size: 200 },
-  {
-    accessorFn: (row) =>
-      row.seguimiento?.[0]?.Ubicacion || "Sin ubicación registrada",
-    header: "Ubicación",
-    size: 200,
-  },
-  {
-    accessorFn: (row) =>
-      row.seguimiento?.[0]?.FechaReg || "Sin fecha registrada",
-    header: "Fecha Registro",
-    size: 200,
-  },
-  {
-    accessorFn: (row) =>
-      row.seguimiento?.[0]?.UsuarioReg || "Sin usuario registrado",
-    header: "Usuario Registro",
-    size: 200,
-  },
 ];
+
 
 const TrackingTable = () => {
   const [trackingData, setTrackingData] = useState([]);
   const [loadingTable, setLoadingTable] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
+  const formatResponseData = (data) => {
+    return data.flatMap((item) =>
+      item.rastreos.map((tracking) => ({
+        ...tracking,
+        IdInstitutoOK: item.IdInstitutoOK,
+      }))
+    );
+  };
+
   // Función para obtener todos los rastreos
   const fetchAllTrackings = async () => {
     try {
       setLoadingTable(true);
+  
       const response = await axios.get(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/instituto/rastreos`
       );
-      if (response.data) {
-        // Formatear datos para incluir los rastreos directamente
-        const formattedData = response.data.flatMap((item) =>
-          item.rastreos.map((tracking) => ({
-            ...tracking,
-            IdInstitutoOK: item.IdInstitutoOK,
-          }))
-        );
-        setTrackingData(formattedData);
-      } else {
-        setTrackingData([]);
-      }
+  
+      console.log("Datos de rastreos recibidos del servidor:", response.data);
+  
+      // Verifica si se recibieron datos y aplana la estructura
+      const formattedData = response.data.flatMap((rastreo) =>
+        rastreo.NumeroGuia.map((_, index) => ({
+          IdInstitutoOK: rastreo.IdInstitutoOK || "Sin ID de Instituto",
+          NumeroGuia: rastreo.NumeroGuia[index] || "Sin número de guía",
+          IdRepartidorOK: rastreo.IdRepartidorOK[index] || "Sin ID de repartidor",
+          NombreRepartidor: rastreo.NombreRepartidor[index] || "Sin nombre de repartidor",
+          Alias: rastreo.Alias[index] || "Sin alias",
+        }))
+      );
+  
+      setTrackingData(formattedData); // Actualiza el estado con los datos planos
     } catch (error) {
       console.error("Error al obtener rastreos:", error);
     } finally {
       setLoadingTable(false);
     }
   };
+  
+  
+  
+  
 
   // Función para buscar rastreos por ID de Instituto
   const handleSearchByInstitute = async (instituteId) => {
@@ -70,14 +70,10 @@ const TrackingTable = () => {
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/rastreos/instituto/${instituteId}`
       );
       if (response.data && response.data.rastreos) {
-        const formattedData = response.data.rastreos.map((tracking) => ({
-          ...tracking,
-          IdInstitutoOK: response.data.IdInstitutoOK,
-        }));
-        setTrackingData(formattedData);
+        setTrackingData(formatResponseData([response.data]));
       } else {
-        setTrackingData([]);
         alert("No se encontraron rastreos para el Instituto especificado.");
+        setTrackingData([]);
       }
     } catch (error) {
       console.error("Error al buscar rastreos por Instituto:", error);
