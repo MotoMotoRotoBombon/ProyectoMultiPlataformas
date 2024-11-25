@@ -409,3 +409,41 @@ export const deleteInfoAdByInstitute = async (req, res) => {
   }
 };
 
+export const updateInfoAdByIdInstituto = async (req, res, next) => {
+  try {
+    const { IdInstitutoOK } = req.params; // ID del instituto desde los parámetros
+    const { Etiqueta, Valor, Secuencia, Activo, FechaReg, UsuarioReg } = req.body; // Datos a actualizar
+
+    // Buscar el documento por IdInstitutoOK
+    const entrega = await Entrega.findOne({ IdInstitutoOK });
+
+    if (!entrega) {
+      return res.status(404).json({
+        message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+      });
+    }
+
+    // Actualizar todos los subdocumentos en info_ad
+    entrega.info_ad.forEach((info) => {
+      info.Etiqueta = Etiqueta || info.Etiqueta;
+      info.Valor = Valor || info.Valor;
+      info.Secuencia = Secuencia || info.Secuencia;
+      info.detail_row.Activo = Activo || info.detail_row.Activo;
+      info.detail_row.detail_row_reg[0].FechaReg =
+        FechaReg || info.detail_row.detail_row_reg[0].FechaReg;
+      info.detail_row.detail_row_reg[0].UsuarioReg =
+        UsuarioReg || info.detail_row.detail_row_reg[0].UsuarioReg;
+    });
+
+    // Guardar los cambios
+    await entrega.save();
+
+    return res.status(200).json({
+      message: "Información adicional actualizada correctamente.",
+      updatedInfoAd: entrega.info_ad,
+    });
+  } catch (error) {
+    console.error("Error al actualizar información adicional:", error);
+    next(error);
+  }
+};

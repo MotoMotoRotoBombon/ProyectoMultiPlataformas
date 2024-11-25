@@ -31,4 +31,22 @@ Content-Type: application/json
   "UsuarioReg": "UsuarioDePrueba"
 }
 
+###
+DELETE http://localhost:3020/api/v1/entregas/info-ad/5001
+###
+PUT http://localhost:3020/api/v1/entregas/info-ad/7001
+Content-Type: application/json
+
+{
+  "Etiqueta": "NuevaEtiqueta",
+  "Valor": "NuevoValor",
+  "Secuencia": 5,
+  "Activo": "N",
+  "FechaReg": "2024-11-25T10:00:00.000Z",
+  "UsuarioReg": "UsuarioActualizado"
+}
+
+
+
+
 

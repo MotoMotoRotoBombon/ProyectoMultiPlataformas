@@ -5,8 +5,10 @@ import axios from "axios";
 import PlaylistAddCheckIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
-import DeleteShippingModal from "../modals/DeleteShippingModal"; // Usamos este modal
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteShippingModal from "../modals/DeleteShippingModal";
 import SearchModal from "../modals/SearchModal";
+import EditInfoAdModal from "../modals/EditInfoAdModal";
 
 const InfoAdColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID del Instituto", size: 150 },
@@ -34,6 +36,7 @@ const InfoAdTable = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Función para cargar toda la tabla de InfoAd
   const fetchAllInfoAd = async () => {
@@ -95,13 +98,12 @@ const InfoAdTable = () => {
         return;
       }
 
-      const { IdInstitutoOK } = selectedRow; // Obtiene el ID del instituto seleccionado
+      const { IdInstitutoOK } = selectedRow;
 
       await axios.delete(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/info-ad/${IdInstitutoOK}`
       );
 
-      // Elimina la fila de la tabla
       setInfoAdData((prevData) =>
         prevData.filter((row) => row.IdInstitutoOK !== IdInstitutoOK)
       );
@@ -112,6 +114,22 @@ const InfoAdTable = () => {
     } catch (error) {
       console.error("Error al eliminar Info Adicional:", error);
       alert("Hubo un error al eliminar la información. Intenta nuevamente.");
+    }
+  };
+
+  // Función para editar Info Adicional
+  const handleEditInfoAd = async (updatedData) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/info-ad/${updatedData.IdInstitutoOK}`,
+        updatedData
+      );
+      alert("Información adicional actualizada correctamente.");
+      fetchAllInfoAd(); // Recargar los datos
+      setIsEditModalOpen(false); // Cerrar el modal
+    } catch (error) {
+      console.error("Error al actualizar información adicional:", error);
+      alert("Hubo un error al actualizar la información. Intenta nuevamente.");
     }
   };
 
@@ -137,6 +155,14 @@ const InfoAdTable = () => {
         onSearch={handleSearchByInstitute}
       />
 
+      {/* Modal de edición */}
+      <EditInfoAdModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onEditInfoAd={handleEditInfoAd}
+        selectedRow={selectedRow}
+      />
+
       {/* Tabla */}
       <MaterialReactTable
         columns={InfoAdColumns}
@@ -147,7 +173,7 @@ const InfoAdTable = () => {
           showGlobalFilter: true,
         }}
         muiTableBodyRowProps={({ row }) => ({
-          onClick: () => setSelectedRow(row.original), // Seleccionar fila al hacer clic
+          onClick: () => setSelectedRow(row.original),
           style: {
             backgroundColor:
               selectedRow?.IdInstitutoOK === row.original.IdInstitutoOK
@@ -158,7 +184,6 @@ const InfoAdTable = () => {
         })}
         renderTopToolbarCustomActions={() => (
           <Stack direction="row" spacing={2}>
-            {/* Botón para abrir modal de búsqueda */}
             <Tooltip title="Buscar por Instituto">
               <IconButton
                 color="info"
@@ -168,7 +193,6 @@ const InfoAdTable = () => {
               </IconButton>
             </Tooltip>
 
-            {/* Botón para eliminar */}
             <Tooltip title="Eliminar registro seleccionado">
               <IconButton
                 color="error"
@@ -178,8 +202,18 @@ const InfoAdTable = () => {
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
-             {/* Botón para cargar todos */}
-             <Tooltip title="Cargar todos los registros">
+
+            <Tooltip title="Editar registro seleccionado">
+              <IconButton
+                color="primary"
+                onClick={() => setIsEditModalOpen(true)}
+                disabled={!selectedRow}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Cargar todos los registros">
               <IconButton color="primary" onClick={fetchAllInfoAd}>
                 <PlaylistAddCheckIcon />
               </IconButton>
