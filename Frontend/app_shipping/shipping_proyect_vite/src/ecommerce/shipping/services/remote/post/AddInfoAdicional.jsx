@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3020/api/v1"; // Asegúrate de que esta URL coincida con tu configuración de backend
+const API_BASE_URL = "http://localhost:3020/api/v1"; 
 
 export const addInfoAdicional = async (IdInstitutoOK, infoAdicionalData) => {
   try {
