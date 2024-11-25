@@ -324,15 +324,57 @@ export const getAllRastreos = async (req, res, next) => {
     console.error("Error al obtener todos los rastreos:", error);
     next(error);
   }
+
 };
 
-  
+//CRUD INFO ADD
+//ADD 
+// Agregar información adicional
+export const addInfoAdicional = async (req, res, next) => {
+  try {
+    const { IdInstitutoOK } = req.params; // Obtener el ID del instituto desde los parámetros
+    const { Etiqueta, Valor, Secuencia, Activo, FechaReg, UsuarioReg } = req.body; // Obtener datos del cuerpo de la solicitud
 
+    // Buscar el documento correspondiente al ID del instituto
+    const entrega = await Entrega.findOne({ IdInstitutoOK });
 
-  
-  
-  
+    if (!entrega) {
+      return res
+        .status(404)
+        .json({ message: `No se encontró un registro con el ID Instituto: ${IdInstitutoOK}` });
+    }
 
+    // Crear el nuevo objeto de información adicional
+    const nuevaInfoAdicional = {
+      IdEtiqueta: Etiqueta,
+      Etiqueta,
+      Valor,
+      Secuencia,
+      detail_row: {
+        Activo: Activo || "S",
+        detail_row_reg: [
+          {
+            FechaReg: FechaReg || new Date(),
+            UsuarioReg: UsuarioReg || "Sistema", // Usuario por defecto si no se proporciona
+          },
+        ],
+      },
+    };
 
-  
+    // Agregar el nuevo objeto a la lista de info_ad en el documento existente
+    entrega.info_ad.push(nuevaInfoAdicional);
+
+    // Guardar los cambios en la base de datos
+    await entrega.save();
+
+    // Responder con el nuevo objeto creado
+    res.status(201).json({
+      message: "Información adicional agregada correctamente.",
+      infoAdicional: nuevaInfoAdicional,
+    });
+  } catch (error) {
+    console.error("Error al agregar información adicional:", error);
+    next(boom.internal(error.message));
+  }
+};
 

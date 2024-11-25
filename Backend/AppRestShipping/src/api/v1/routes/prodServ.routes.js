@@ -47,6 +47,11 @@ router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosBy
 // Nueva ruta: Obtener todos los rastreos
 router.get("/instituto/rastreos", entregaController.getAllRastreos);
 
+// Ruta para agregar información adicional
+router.post("/info-adicional/:IdInstitutoOK", entregaController.addInfoAdicional);
+
+
+
 
 
 
