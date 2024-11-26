@@ -52,7 +52,9 @@ router.get("/rastreos", entregaController.getAllRastreos);
 
 router.post('/rastreos', entregaController.createRastreo);
 //CRUD INFO 
+router.put("/productos/:IdProdServOK", entregaController.updateProduct);
 
+router.delete("/productos/:IdProdServOK", entregaController.deleteProduct);
 
 // Nueva ruta: Obtener todas las IDs de Institutos con su info_ad
 router.get("/info-ad", entregaController.getAllInstitutesInfoAd);

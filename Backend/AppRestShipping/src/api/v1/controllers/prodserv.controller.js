@@ -61,6 +61,61 @@ export const updateEntrega = async (req, res, next) => {
     }
 };
 
+export const updateProduct = async (req, res, next) => {
+  try {
+    const { IdProdServOK } = req.params; // Obtener el ID del producto desde los parámetros
+    const updatedData = req.body; // Obtener los datos actualizados desde el cuerpo de la solicitud
+
+    // Actualizar el producto específico dentro de envios.productos
+    const updatedEntrega = await Entrega.updateOne(
+      { "envios.productos.IdProdServOK": IdProdServOK }, // Buscar por IdProdServOK
+      {
+        $set: {
+          "envios.$[].productos.$[producto]": updatedData, // Actualizar los datos
+        },
+      },
+      {
+        arrayFilters: [
+          { "producto.IdProdServOK": IdProdServOK }, // Filtro para el producto específico
+        ],
+        new: true, // Retornar el documento actualizado
+      }
+    );
+
+    if (!updatedEntrega.modifiedCount) {
+      return res.status(404).json({ message: "Producto no encontrado." });
+    }
+
+    res.status(200).json({ message: "Producto actualizado correctamente." });
+  } catch (error) {
+    console.error("Error al actualizar el producto:", error);
+    next(error);
+  }
+};
+
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const { IdProdServOK } = req.params; // Obtener el ID del producto a eliminar
+
+    const result = await Entrega.updateOne(
+      { "envios.productos.IdProdServOK": IdProdServOK }, // Buscar el producto dentro de envios
+      {
+        $pull: { "envios.$[].productos": { IdProdServOK } }, // Eliminar el producto por ID
+      }
+    );
+
+    if (!result.modifiedCount) {
+      return res.status(404).json({ message: "Producto no encontrado." });
+    }
+
+    res.status(200).json({ message: "Producto eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar el producto:", error);
+    next(error);
+  }
+};
+
+
 // Eliminar un envío por IdInstitutoOK
 export const deleteEntregaByIdInstitutoOK = async (req, res, next) => {
     try {
