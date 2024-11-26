@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { MaterialReactTable } from "material-react-table";
-import { Box, Stack, Tooltip, IconButton } from "@mui/material";
-import FindInPageIcon from "@mui/icons-material/FindInPage"; // Importa el nuevo ícono
-import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Tooltip, IconButton, Stack } from "@mui/material";
 import axios from "axios";
-
-import SearchModal from "../modals/SearchModal"; // Modal para búsqueda por Instituto
+import PlaylistAddCheckIcon from "@mui/icons-material/Refresh";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteShippingModal from "../modals/DeleteShippingModal";
+import EditProductModal from "../modals/EditProductModal";
 
 const ProductColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
-  { accessorKey: "IdProdServOK", header: "ID Producto", size: 200 },
-  { accessorKey: "IdPresentaOK", header: "ID Presentación", size: 200 },
-  { accessorKey: "DesProdServ", header: "Descripción Producto", size: 200 },
-  { accessorKey: "DesPresenta", header: "Descripción Presentación", size: 200 },
+  { accessorKey: "IdProdServOK", header: "ID Producto", size: 150 },
+  { accessorKey: "DesProdServ", header: "Descripción del Producto", size: 200 },
   { accessorKey: "CantidadPed", header: "Cantidad Pedida", size: 100 },
   { accessorKey: "CantidadEnt", header: "Cantidad Entregada", size: 100 },
 ];
@@ -21,9 +19,11 @@ const ProductColumns = [
 const ProductTable = () => {
   const [productData, setProductData] = useState([]);
   const [loadingTable, setLoadingTable] = useState(false);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Función para cargar todos los productos
+  // Función para obtener todos los productos
   const fetchAllProducts = async () => {
     try {
       setLoadingTable(true);
@@ -31,64 +31,98 @@ const ProductTable = () => {
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/productos`
       );
 
-      // Mapea los datos para obtener productos y asociarlos con el Instituto
-      const formattedData = response.data.flatMap((entry) =>
-        entry.productos.map((product) => ({
-          ...product,
-          IdInstitutoOK: entry.IdInstitutoOK, // Agrega el ID del Instituto a cada producto
-        }))
-      );
-
-      setProductData(formattedData);
-    } catch (error) {
-      console.error("Error al cargar los productos:", error);
-      alert("Error al cargar los productos. Intenta nuevamente.");
-    } finally {
-      setLoadingTable(false);
-    }
-  };
-
-  // Función para buscar productos por IdInstitutoOK
-  const fetchProductsByInstitute = async (instituteId) => {
-    try {
-      setLoadingTable(true);
-      const response = await axios.get(
-        `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/${instituteId}/productos`
-      );
-
-      if (response.data && response.data.productos) {
-        const formattedData = response.data.productos.map((product) => ({
-          ...product,
-          IdInstitutoOK: response.data.IdInstitutoOK, // Agrega el ID del Instituto a cada producto
-        }));
-        setProductData(formattedData);
+      if (response.data) {
+        const processedData = response.data.flatMap((entry) =>
+          entry.productos.map((product) => ({
+            ...product,
+            IdInstitutoOK: entry.IdInstitutoOK,
+          }))
+        );
+        setProductData(processedData);
       } else {
         setProductData([]);
-        alert("No se encontraron productos para el Instituto especificado.");
       }
     } catch (error) {
-      console.error("Error al buscar productos por IdInstitutoOK:", error);
-      alert("Hubo un error al buscar productos. Intenta nuevamente.");
+      console.error("Error al cargar los productos:", error);
     } finally {
       setLoadingTable(false);
     }
   };
 
-  // Cargar los productos cuando el componente se monta
+  // Función para eliminar un producto
+  const handleDeleteProduct = async () => {
+    try {
+      if (!selectedRow) {
+        alert("Por favor, selecciona un producto para eliminar.");
+        return;
+      }
+
+      const { IdProdServOK } = selectedRow;
+
+      await axios.delete(
+        `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/productos/${IdProdServOK}`
+      );
+
+      setProductData((prevData) =>
+        prevData.filter((row) => row.IdProdServOK !== IdProdServOK)
+      );
+
+      alert(`Producto ${IdProdServOK} eliminado correctamente.`);
+      setSelectedRow(null);
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+      alert("Hubo un error al eliminar el producto. Intenta nuevamente.");
+    }
+  };
+
+  // Función para editar un producto
+  const handleEditProduct = async (updatedProduct) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/productos/${updatedProduct.IdProdServOK}`,
+        updatedProduct
+      );
+
+      setProductData((prevData) =>
+        prevData.map((product) =>
+          product.IdProdServOK === updatedProduct.IdProdServOK
+            ? updatedProduct
+            : product
+        )
+      );
+
+      alert("Producto actualizado correctamente.");
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error al actualizar el producto:", error);
+      alert("Hubo un error al actualizar el producto. Intenta nuevamente.");
+    }
+  };
+
   useEffect(() => {
     fetchAllProducts();
   }, []);
 
   return (
     <Box>
-      {/* Modal de búsqueda */}
-      <SearchModal
-        open={isSearchModalOpen}
-        onClose={() => setIsSearchModalOpen(false)}
-        onSearch={fetchProductsByInstitute}
+      {/* Modal de eliminación */}
+      <DeleteShippingModal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDeleteShipping={handleDeleteProduct}
+        selectedRow={selectedRow}
       />
 
-      {/* Tabla de productos */}
+      {/* Modal de edición */}
+      <EditProductModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onEditProduct={handleEditProduct}
+        selectedRow={selectedRow}
+      />
+
+      {/* Tabla */}
       <MaterialReactTable
         columns={ProductColumns}
         data={productData}
@@ -97,22 +131,39 @@ const ProductTable = () => {
           density: "compact",
           showGlobalFilter: true,
         }}
+        muiTableBodyRowProps={({ row }) => ({
+          onClick: () => setSelectedRow(row.original),
+          style: {
+            backgroundColor:
+              selectedRow?.IdProdServOK === row.original.IdProdServOK
+                ? "#d1e7ff"
+                : "white",
+            cursor: "pointer",
+          },
+        })}
         renderTopToolbarCustomActions={() => (
           <Stack direction="row" spacing={2}>
-            {/* Botón para abrir el modal de búsqueda */}
-            <Tooltip title="Buscar productos por Instituto">
+            <Tooltip title="Eliminar Producto Seleccionado">
               <IconButton
-                color="info"
-                onClick={() => setIsSearchModalOpen(true)}
+                color="error"
+                onClick={() => setIsDeleteModalOpen(true)}
+                disabled={!selectedRow}
               >
-                <SearchIcon />
+                <DeleteIcon />
               </IconButton>
             </Tooltip>
-
-            {/* Botón para cargar todos los productos */}
-            <Tooltip title="Cargar todos los productos">
+            <Tooltip title="Editar Producto Seleccionado">
+              <IconButton
+                color="primary"
+                onClick={() => setIsEditModalOpen(true)}
+                disabled={!selectedRow}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Cargar Productos">
               <IconButton color="primary" onClick={fetchAllProducts}>
-                <PlaylistAddCheckIcon  />
+                <PlaylistAddCheckIcon />
               </IconButton>
             </Tooltip>
           </Stack>
