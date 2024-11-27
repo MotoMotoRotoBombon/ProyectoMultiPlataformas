@@ -38,7 +38,9 @@ const ShippingsTable = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
+  const [enviosData, setEnviosData] = useState([]);
 
+  
   // Cargar datos desde el backend
   const loadShippingsData = async () => {
     setLoading(true);
@@ -146,7 +148,7 @@ const ShippingsTable = () => {
   };
 
   const handleAddEnvios = () => {
-    alert(`Agregar Envíos para: ${selectedRow.IdInstitutoOK}`);
+    setIsAddEnviosModalOpen(true);
     handleCloseContextMenu();
   };
 
@@ -183,6 +185,18 @@ const ShippingsTable = () => {
         IdInstitutoOK={selectedRow?.IdInstitutoOK}
         onInfoAdAdded={(newInfoAd) => {
           console.log("Información adicional agregada:", newInfoAd);
+          loadShippingsData(); // Recargar datos
+        }}
+      />
+
+       <AddEnviosModal
+        open={isAddEnviosModalOpen}
+        onClose={() => setIsAddEnviosModalOpen(false)}
+        IdInstitutoOK={selectedRow?.IdInstitutoOK} // Pasa la fila seleccionada al modal
+        enviosData={enviosData}
+        onEnvioAdded={(newEnvio) => {
+          setEnviosData((prevData) => [...prevData, newEnvio]);
+          console.log("Envío agregado:", newEnvio);
           loadShippingsData(); // Recargar datos
         }}
       />
