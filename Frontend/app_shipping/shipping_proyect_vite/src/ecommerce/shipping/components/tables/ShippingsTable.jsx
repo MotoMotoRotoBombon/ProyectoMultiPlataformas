@@ -19,6 +19,7 @@ import AddInfoAdicional from "../modals/AddInfoAdicionalModal";
 import AddTrackingModal from "../modals/AddTrackingModal "; // Importar modal de rastreo
 import { deleteShipping } from "../../services/remote/del/DeleteShipping";
 import { getAllShippings } from "../../services/remote/get/GetAllShippings";
+import AddEnviosModal from "../modals/AddEnviosModal";
 
 const ShippingColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
@@ -39,7 +40,8 @@ const ShippingsTable = () => {
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
   const [enviosData, setEnviosData] = useState([]);
-
+  const [isAddEnviosModalOpen, setIsAddEnviosModalOpen] = useState(false);
+  
   
   // Cargar datos desde el backend
   const loadShippingsData = async () => {
