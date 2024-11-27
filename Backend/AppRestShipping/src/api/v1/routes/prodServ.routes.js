@@ -82,6 +82,7 @@ router.delete("/envios/:IdInstitutoOK", entregaController.deleteEnviosByInstitut
 // Nueva ruta: Actualizar envíos de un Instituto específico
 router.put("/envios/:IdInstitutoOK", entregaController.updateEnviosByInstitute);
 
+router.put("/FIC/:IdInstitutoOK", entregaController.updateEntregaByIdInstitutoOK);
   
 
 

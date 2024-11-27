@@ -3,11 +3,11 @@ import axios from "axios";
 export const editShipping = async (shippingId, updatedData) => {
   try {
     const response = await axios.put(
-      `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/${shippingId}`, // URL base + endpoint
+      `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/FIC/${shippingId}`, // URL corregida con el '/' antes de shippingId
       updatedData,
       {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", // Correcto para enviar datos JSON
         },
       }
     );

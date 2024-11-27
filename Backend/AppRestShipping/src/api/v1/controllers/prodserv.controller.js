@@ -690,3 +690,25 @@ export const updateEnviosByInstitute = async (req, res, next) => {
       next(error);
   }
 };
+
+//CHECHO
+export const updateEntregaByIdInstitutoOK = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params; // Obtiene el parámetro de la URL
+      const updatedData = req.body; // Obtiene los datos a actualizar del cuerpo de la solicitud
+
+      const updatedEntrega = await entregaService.updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+
+      if (!updatedEntrega) {
+          return res.status(404).json({ message: 'Envío no encontrado.' });
+      }
+
+      return res.status(200).json({ 
+          message: 'Envío actualizado exitosamente.', 
+          updatedEntrega 
+      });
+  } catch (error) {
+      console.error('Error en updateEntregaByIdInstitutoOK:', error);
+      next(boom.internal(error.message)); // Manejo de errores
+  }
+};

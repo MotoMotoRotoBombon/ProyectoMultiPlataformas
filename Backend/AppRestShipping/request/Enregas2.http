@@ -47,6 +47,17 @@ Content-Type: application/json
 }
 
 
+### 
+PUT http://localhost:3020/api/v1/entregas/FIC/1001
+Content-Type: application/json
+
+{
+  "IdNegocioOK": "2001",
+  "IdEntregaOK": "1001-2001-INTL001",
+  "IdEntregaBK": "INTL-001",
+  "IdOrdenOK": "ORD-1001"
+}
+
 
 
 
