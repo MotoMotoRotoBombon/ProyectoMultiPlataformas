@@ -38,7 +38,7 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
 
   // Maneja el envío del formulario
   const handleSubmit = () => {
-    if (!formData.Etiqueta || !formData.Valor || !formData.Secuencia) {
+    if (!formData.Etiqueta || !formData.Valor || !formData.Secuencia || !formData.UsuarioReg) {
       alert("Por favor, completa todos los campos obligatorios.");
       return;
     }
