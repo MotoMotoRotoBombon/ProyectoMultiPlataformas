@@ -4,7 +4,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateProduct = exports.updateInfoAdByIdInstituto = exports.updateEntrega = exports.getRastreosByInstituto = exports.getProductosByInstituto = exports.getInfoAdByIdInstituto = exports.getEnviosByInstitutoWithId = exports.getEntregasByInstituto = exports.getAllRastreos = exports.getAllProducts = exports.getAllInstitutesInfoAd = exports.getAllEnvios = exports.getAllEntregas = exports.deleteProduct = exports.deleteInfoAdByInstitute = exports.deleteEntregaByIdInstitutoOK = exports.createEntrega = exports.addInfoAdicional = void 0;
+exports.updateProduct = exports.updateInfoAdByIdInstituto = exports.updateEnviosByInstitute = exports.updateEntregaByIdInstitutoOK = exports.updateEntrega = exports.getRastreosByInstituto = exports.getProductosByInstituto = exports.getInfoAdByIdInstituto = exports.getEnviosByInstitutoWithId = exports.getEntregasByInstituto = exports.getAllRastreos = exports.getAllProducts = exports.getAllInstitutesInfoAd = exports.getAllInstitutesEnvios = exports.getAllEnvios = exports.getAllEntregas = exports.deleteProduct = exports.deleteInfoAdByInstitute = exports.deleteEnviosByInstitute = exports.deleteEntregaByIdInstitutoOK = exports.createRastreo = exports.createEntrega = exports.addInfoAdicional = exports.addEnvio = void 0;
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _prodServ = _interopRequireDefault(require("../services/prodServ.service"));
@@ -101,39 +101,41 @@ var createEntrega = exports.createEntrega = /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }();
-
-// Actualizar un envío
 var updateEntrega = exports.updateEntrega = /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res, next) {
-    var id, updatedEntrega;
+    var IdInstitutoOK, updatedData, updatedEntrega;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
           _context3.prev = 0;
-          id = req.params.id;
-          _context3.next = 4;
-          return _prodServ["default"].update(id, req.body);
-        case 4:
+          IdInstitutoOK = req.params.IdInstitutoOK;
+          updatedData = req.body;
+          _context3.next = 5;
+          return _prodServ["default"].updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+        case 5:
           updatedEntrega = _context3.sent;
           if (updatedEntrega) {
-            _context3.next = 7;
+            _context3.next = 8;
             break;
           }
           return _context3.abrupt("return", res.status(404).json({
             message: 'Envío no encontrado.'
           }));
-        case 7:
-          return _context3.abrupt("return", res.status(200).json(updatedEntrega));
-        case 10:
-          _context3.prev = 10;
+        case 8:
+          return _context3.abrupt("return", res.status(200).json({
+            message: 'Envío actualizado exitosamente.',
+            updatedEntrega: updatedEntrega
+          }));
+        case 11:
+          _context3.prev = 11;
           _context3.t0 = _context3["catch"](0);
-          console.error('Error en updateEntrega:', _context3.t0);
+          console.error('Error en updateEntregaByIdInstitutoOK:', _context3.t0);
           next(_boom["default"].internal(_context3.t0.message));
-        case 14:
+        case 15:
         case "end":
           return _context3.stop();
       }
-    }, _callee3, null, [[0, 10]]);
+    }, _callee3, null, [[0, 11]]);
   }));
   return function updateEntrega(_x7, _x8, _x9) {
     return _ref3.apply(this, arguments);
@@ -692,40 +694,49 @@ var getAllRastreos = exports.getAllRastreos = /*#__PURE__*/function () {
             "envios.rastreos": {
               $exists: true
             }
-          },
-          // Filtra registros que tengan rastreos
-          {
+          }, {
             IdInstitutoOK: 1,
-            // Incluye IdInstitutoOK
-            "envios.rastreos": 1 // Incluye solo los rastreos dentro de envios
+            "envios.rastreos": 1
           });
         case 3:
           envios = _context15.sent;
-          // Formatear la respuesta para incluir IdInstitutoOK y los rastreos
-          rastreosData = envios.map(function (entrega) {
-            return {
-              IdInstitutoOK: entrega.IdInstitutoOK,
-              rastreos: entrega.envios.filter(function (envio) {
-                return envio.rastreos;
-              }) // Filtra envíos que tengan rastreos
-              .map(function (envio) {
-                return envio.rastreos;
-              }) // Obtén solo los rastreos
-            };
+          if (!(!envios || envios.length === 0)) {
+            _context15.next = 6;
+            break;
+          }
+          return _context15.abrupt("return", res.status(404).json({
+            message: "No se encontraron rastreos."
+          }));
+        case 6:
+          // Genera un array plano donde cada rastreo es un objeto único
+          rastreosData = envios.flatMap(function (entrega) {
+            return (entrega.envios || []).flatMap(function (envio) {
+              var rastreos = Array.isArray(envio.rastreos) ? envio.rastreos : [envio.rastreos].filter(Boolean);
+              return rastreos.map(function (rastreo) {
+                return {
+                  IdInstitutoOK: entrega.IdInstitutoOK,
+                  NumeroGuia: (rastreo === null || rastreo === void 0 ? void 0 : rastreo.NumeroGuia) || "Sin número de guía",
+                  IdRepartidorOK: (rastreo === null || rastreo === void 0 ? void 0 : rastreo.IdRepartidorOK) || "Sin ID de repartidor",
+                  NombreRepartidor: (rastreo === null || rastreo === void 0 ? void 0 : rastreo.NombreRepartidor) || "Sin nombre de repartidor",
+                  Alias: (rastreo === null || rastreo === void 0 ? void 0 : rastreo.Alias) || "Sin alias"
+                };
+              });
+            });
           });
+          console.log("Datos de rastreos procesados y enviados al cliente:", rastreosData); // Para depuración
           res.status(200).json(rastreosData);
-          _context15.next = 12;
+          _context15.next = 15;
           break;
-        case 8:
-          _context15.prev = 8;
+        case 11:
+          _context15.prev = 11;
           _context15.t0 = _context15["catch"](0);
           console.error("Error al obtener todos los rastreos:", _context15.t0);
           next(_context15.t0);
-        case 12:
+        case 15:
         case "end":
           return _context15.stop();
       }
-    }, _callee15, null, [[0, 8]]);
+    }, _callee15, null, [[0, 11]]);
   }));
   return function getAllRastreos(_x43, _x44, _x45) {
     return _ref15.apply(this, arguments);
@@ -911,5 +922,338 @@ var updateInfoAdByIdInstituto = exports.updateInfoAdByIdInstituto = /*#__PURE__*
   }));
   return function updateInfoAdByIdInstituto(_x51, _x52, _x53) {
     return _ref18.apply(this, arguments);
+  };
+}();
+
+//APARTADO DE RASTREO
+var createRastreo = exports.createRastreo = /*#__PURE__*/function () {
+  var _ref19 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee19(req, res, next) {
+    var _req$body3, IdInstitutoOK, NumeroGuia, IdRepartidorOK, NombreRepartidor, Alias, Ubicacion, FechaRegistro, UsuarioRegistro, nuevoRastreo, instituto, resultado;
+    return _regenerator["default"].wrap(function _callee19$(_context19) {
+      while (1) switch (_context19.prev = _context19.next) {
+        case 0:
+          _context19.prev = 0;
+          _req$body3 = req.body, IdInstitutoOK = _req$body3.IdInstitutoOK, NumeroGuia = _req$body3.NumeroGuia, IdRepartidorOK = _req$body3.IdRepartidorOK, NombreRepartidor = _req$body3.NombreRepartidor, Alias = _req$body3.Alias, Ubicacion = _req$body3.Ubicacion, FechaRegistro = _req$body3.FechaRegistro, UsuarioRegistro = _req$body3.UsuarioRegistro; // Validar campos obligatorios
+          if (!(!IdInstitutoOK || !NumeroGuia || !IdRepartidorOK || !NombreRepartidor || !Alias || !Ubicacion || !FechaRegistro || !UsuarioRegistro)) {
+            _context19.next = 4;
+            break;
+          }
+          return _context19.abrupt("return", res.status(400).json({
+            message: 'Todos los campos son obligatorios.'
+          }));
+        case 4:
+          // Crear el nuevo rastreo
+          nuevoRastreo = {
+            NumeroGuia: NumeroGuia,
+            IdRepartidorOK: IdRepartidorOK,
+            NombreRepartidor: NombreRepartidor,
+            Alias: Alias,
+            Ubicacion: Ubicacion,
+            FechaRegistro: FechaRegistro,
+            UsuarioRegistro: UsuarioRegistro
+          }; // Verificar si existe el documento y que `envios` no esté vacío
+          _context19.next = 7;
+          return _ProdServ["default"].findOne({
+            IdInstitutoOK: IdInstitutoOK
+          });
+        case 7:
+          instituto = _context19.sent;
+          if (instituto) {
+            _context19.next = 10;
+            break;
+          }
+          return _context19.abrupt("return", res.status(404).json({
+            message: "No se encontr\xF3 el instituto con IdInstitutoOK: ".concat(IdInstitutoOK)
+          }));
+        case 10:
+          if (!(instituto.envios.length === 0)) {
+            _context19.next = 13;
+            break;
+          }
+          _context19.next = 13;
+          return _ProdServ["default"].updateOne({
+            IdInstitutoOK: IdInstitutoOK
+          }, {
+            $push: {
+              envios: {
+                rastreos: []
+              }
+            }
+          });
+        case 13:
+          _context19.next = 15;
+          return _ProdServ["default"].updateOne({
+            IdInstitutoOK: IdInstitutoOK,
+            'envios.0': {
+              $exists: true
+            }
+          },
+          // Buscar que exista al menos un objeto en `envios`
+          {
+            $push: {
+              'envios.0.rastreos': nuevoRastreo
+            }
+          });
+        case 15:
+          resultado = _context19.sent;
+          if (resultado.modifiedCount) {
+            _context19.next = 18;
+            break;
+          }
+          return _context19.abrupt("return", res.status(500).json({
+            message: 'No se pudo agregar el rastreo.'
+          }));
+        case 18:
+          res.status(201).json({
+            message: 'Rastreo creado con éxito.',
+            data: nuevoRastreo
+          });
+          _context19.next = 25;
+          break;
+        case 21:
+          _context19.prev = 21;
+          _context19.t0 = _context19["catch"](0);
+          console.error('Error en createRastreo:', _context19.t0);
+          res.status(500).json({
+            message: 'Error interno del servidor.',
+            error: _context19.t0.message
+          });
+        case 25:
+        case "end":
+          return _context19.stop();
+      }
+    }, _callee19, null, [[0, 21]]);
+  }));
+  return function createRastreo(_x54, _x55, _x56) {
+    return _ref19.apply(this, arguments);
+  };
+}();
+
+// CRUD para la funcionalidad de envíos
+
+// Obtener todas las IDs de Institutos con sus envíos
+var getAllInstitutesEnvios = exports.getAllInstitutesEnvios = /*#__PURE__*/function () {
+  var _ref20 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee20(req, res, next) {
+    var entregas;
+    return _regenerator["default"].wrap(function _callee20$(_context20) {
+      while (1) switch (_context20.prev = _context20.next) {
+        case 0:
+          _context20.prev = 0;
+          _context20.next = 3;
+          return _ProdServ["default"].find({}, {
+            IdInstitutoOK: 1,
+            envios: 1
+          });
+        case 3:
+          entregas = _context20.sent;
+          if (!(!entregas || entregas.length === 0)) {
+            _context20.next = 6;
+            break;
+          }
+          return _context20.abrupt("return", res.status(404).json({
+            message: "No se encontraron envíos registrados."
+          }));
+        case 6:
+          return _context20.abrupt("return", res.status(200).json(entregas));
+        case 9:
+          _context20.prev = 9;
+          _context20.t0 = _context20["catch"](0);
+          console.error("Error al obtener las IDs de Institutos con sus envíos:", _context20.t0);
+          next(_context20.t0);
+        case 13:
+        case "end":
+          return _context20.stop();
+      }
+    }, _callee20, null, [[0, 9]]);
+  }));
+  return function getAllInstitutesEnvios(_x57, _x58, _x59) {
+    return _ref20.apply(this, arguments);
+  };
+}();
+
+// Agregar un envío para un Instituto específico
+var addEnvio = exports.addEnvio = /*#__PURE__*/function () {
+  var _ref21 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee21(req, res, next) {
+    var IdInstitutoOK, envioData, entrega;
+    return _regenerator["default"].wrap(function _callee21$(_context21) {
+      while (1) switch (_context21.prev = _context21.next) {
+        case 0:
+          _context21.prev = 0;
+          IdInstitutoOK = req.params.IdInstitutoOK;
+          envioData = req.body;
+          _context21.next = 5;
+          return _ProdServ["default"].findOne({
+            IdInstitutoOK: IdInstitutoOK
+          });
+        case 5:
+          entrega = _context21.sent;
+          if (entrega) {
+            _context21.next = 8;
+            break;
+          }
+          return _context21.abrupt("return", res.status(404).json({
+            message: "No se encontr\xF3 un registro con el ID Instituto: ".concat(IdInstitutoOK)
+          }));
+        case 8:
+          entrega.envios.push(envioData);
+          _context21.next = 11;
+          return entrega.save();
+        case 11:
+          return _context21.abrupt("return", res.status(201).json({
+            message: "Envío agregado correctamente.",
+            envio: envioData
+          }));
+        case 14:
+          _context21.prev = 14;
+          _context21.t0 = _context21["catch"](0);
+          console.error("Error al agregar envío:", _context21.t0);
+          next(_context21.t0);
+        case 18:
+        case "end":
+          return _context21.stop();
+      }
+    }, _callee21, null, [[0, 14]]);
+  }));
+  return function addEnvio(_x60, _x61, _x62) {
+    return _ref21.apply(this, arguments);
+  };
+}();
+
+// Eliminar todos los envíos de un Instituto específico
+var deleteEnviosByInstitute = exports.deleteEnviosByInstitute = /*#__PURE__*/function () {
+  var _ref22 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee22(req, res, next) {
+    var IdInstitutoOK, entrega;
+    return _regenerator["default"].wrap(function _callee22$(_context22) {
+      while (1) switch (_context22.prev = _context22.next) {
+        case 0:
+          _context22.prev = 0;
+          IdInstitutoOK = req.params.IdInstitutoOK;
+          _context22.next = 4;
+          return _ProdServ["default"].findOneAndUpdate({
+            IdInstitutoOK: IdInstitutoOK
+          }, {
+            $set: {
+              envios: []
+            }
+          }, {
+            "new": true
+          });
+        case 4:
+          entrega = _context22.sent;
+          if (entrega) {
+            _context22.next = 7;
+            break;
+          }
+          return _context22.abrupt("return", res.status(404).json({
+            message: "No se encontr\xF3 informaci\xF3n para el Instituto con ID: ".concat(IdInstitutoOK)
+          }));
+        case 7:
+          return _context22.abrupt("return", res.status(200).json({
+            message: "Todos los envíos eliminados correctamente.",
+            updatedEntrega: entrega
+          }));
+        case 10:
+          _context22.prev = 10;
+          _context22.t0 = _context22["catch"](0);
+          console.error("Error al eliminar envíos:", _context22.t0);
+          next(_context22.t0);
+        case 14:
+        case "end":
+          return _context22.stop();
+      }
+    }, _callee22, null, [[0, 10]]);
+  }));
+  return function deleteEnviosByInstitute(_x63, _x64, _x65) {
+    return _ref22.apply(this, arguments);
+  };
+}();
+
+// Actualizar los envíos de un Instituto específico
+var updateEnviosByInstitute = exports.updateEnviosByInstitute = /*#__PURE__*/function () {
+  var _ref23 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee23(req, res, next) {
+    var IdInstitutoOK, enviosData, entrega;
+    return _regenerator["default"].wrap(function _callee23$(_context23) {
+      while (1) switch (_context23.prev = _context23.next) {
+        case 0:
+          _context23.prev = 0;
+          IdInstitutoOK = req.params.IdInstitutoOK;
+          enviosData = req.body;
+          _context23.next = 5;
+          return _ProdServ["default"].findOne({
+            IdInstitutoOK: IdInstitutoOK
+          });
+        case 5:
+          entrega = _context23.sent;
+          if (entrega) {
+            _context23.next = 8;
+            break;
+          }
+          return _context23.abrupt("return", res.status(404).json({
+            message: "No se encontr\xF3 informaci\xF3n para el Instituto con ID: ".concat(IdInstitutoOK)
+          }));
+        case 8:
+          entrega.envios = enviosData;
+          _context23.next = 11;
+          return entrega.save();
+        case 11:
+          return _context23.abrupt("return", res.status(200).json({
+            message: "Envíos actualizados correctamente.",
+            updatedEnvios: entrega.envios
+          }));
+        case 14:
+          _context23.prev = 14;
+          _context23.t0 = _context23["catch"](0);
+          console.error("Error al actualizar envíos:", _context23.t0);
+          next(_context23.t0);
+        case 18:
+        case "end":
+          return _context23.stop();
+      }
+    }, _callee23, null, [[0, 14]]);
+  }));
+  return function updateEnviosByInstitute(_x66, _x67, _x68) {
+    return _ref23.apply(this, arguments);
+  };
+}();
+
+//CHECHO
+var updateEntregaByIdInstitutoOK = exports.updateEntregaByIdInstitutoOK = /*#__PURE__*/function () {
+  var _ref24 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee24(req, res, next) {
+    var IdInstitutoOK, updatedData, updatedEntrega;
+    return _regenerator["default"].wrap(function _callee24$(_context24) {
+      while (1) switch (_context24.prev = _context24.next) {
+        case 0:
+          _context24.prev = 0;
+          IdInstitutoOK = req.params.IdInstitutoOK; // Obtiene el parámetro de la URL
+          updatedData = req.body; // Obtiene los datos a actualizar del cuerpo de la solicitud
+          _context24.next = 5;
+          return _prodServ["default"].updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+        case 5:
+          updatedEntrega = _context24.sent;
+          if (updatedEntrega) {
+            _context24.next = 8;
+            break;
+          }
+          return _context24.abrupt("return", res.status(404).json({
+            message: 'Envío no encontrado.'
+          }));
+        case 8:
+          return _context24.abrupt("return", res.status(200).json({
+            message: 'Envío actualizado exitosamente.',
+            updatedEntrega: updatedEntrega
+          }));
+        case 11:
+          _context24.prev = 11;
+          _context24.t0 = _context24["catch"](0);
+          console.error('Error en updateEntregaByIdInstitutoOK:', _context24.t0);
+          next(_boom["default"].internal(_context24.t0.message)); // Manejo de errores
+        case 15:
+        case "end":
+          return _context24.stop();
+      }
+    }, _callee24, null, [[0, 11]]);
+  }));
+  return function updateEntregaByIdInstitutoOK(_x69, _x70, _x71) {
+    return _ref24.apply(this, arguments);
   };
 }();

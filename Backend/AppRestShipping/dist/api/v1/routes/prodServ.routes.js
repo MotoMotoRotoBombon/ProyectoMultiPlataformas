@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = void 0;
 var _express = require("express");
 var entregaController = _interopRequireWildcard(require("../controllers/prodserv.controller"));
+var _validateRastreo = require("../middlewares/validateRastreo");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { "default": e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n["default"] = e, t && t.set(e, n), n; }
 // Shipping
@@ -55,7 +56,8 @@ router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosBy
 
 // Nueva ruta: Obtener todos los rastreos
 router.get("/instituto/rastreos", entregaController.getAllRastreos);
-
+router.get("/rastreos", entregaController.getAllRastreos);
+router.post('/rastreos', entregaController.createRastreo);
 //CRUD INFO 
 router.put("/productos/:IdProdServOK", entregaController.updateProduct);
 router["delete"]("/productos/:IdProdServOK", entregaController.deleteProduct);
@@ -71,4 +73,19 @@ router["delete"]("/info-ad/:IdInstitutoOK", entregaController.deleteInfoAdByInst
 
 // Nueva ruta para actualizar Info Adicional
 router.put('/info-ad/:IdInstitutoOK', entregaController.updateInfoAdByIdInstituto);
+
+//CRUD ENVIOS
+
+// Nueva ruta: Obtener todas las IDs de Institutos con sus envíos
+router.get("/envios", entregaController.getAllInstitutesEnvios);
+
+// Nueva ruta: Agregar un envío para un Instituto específico
+router.post("/envios/:IdInstitutoOK", entregaController.addEnvio);
+
+// Nueva ruta: Eliminar todos los envíos de un Instituto específico
+router["delete"]("/envios/:IdInstitutoOK", entregaController.deleteEnviosByInstitute);
+
+// Nueva ruta: Actualizar envíos de un Instituto específico
+router.put("/envios/:IdInstitutoOK", entregaController.updateEnviosByInstitute);
+router.put("/FIC/:IdInstitutoOK", entregaController.updateEntregaByIdInstitutoOK);
 var _default = exports["default"] = router;

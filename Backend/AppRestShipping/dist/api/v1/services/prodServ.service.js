@@ -189,6 +189,44 @@ var EntregaService = /*#__PURE__*/function () {
         return _getInfoAdByIdInstituto.apply(this, arguments);
       }
       return getInfoAdByIdInstituto;
+    }() //cambios
+  }, {
+    key: "updateByIdInstitutoOK",
+    value: function () {
+      var _updateByIdInstitutoOK = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee7(IdInstitutoOK, updatedData) {
+        return _regenerator["default"].wrap(function _callee7$(_context7) {
+          while (1) switch (_context7.prev = _context7.next) {
+            case 0:
+              _context7.prev = 0;
+              _context7.next = 3;
+              return _ProdServ["default"].findOneAndUpdate({
+                IdInstitutoOK: IdInstitutoOK
+              },
+              // Filtro por IdInstitutoOK
+              {
+                $set: updatedData
+              },
+              // Datos a actualizar
+              {
+                "new": true
+              } // Devuelve el documento actualizado
+              );
+            case 3:
+              return _context7.abrupt("return", _context7.sent);
+            case 6:
+              _context7.prev = 6;
+              _context7.t0 = _context7["catch"](0);
+              throw _context7.t0;
+            case 9:
+            case "end":
+              return _context7.stop();
+          }
+        }, _callee7, null, [[0, 6]]);
+      }));
+      function updateByIdInstitutoOK(_x7, _x8) {
+        return _updateByIdInstitutoOK.apply(this, arguments);
+      }
+      return updateByIdInstitutoOK;
     }()
   }]);
 }();
