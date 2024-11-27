@@ -46,19 +46,27 @@ export const createEntrega = async (req, res, next) => {
     }
 };
 
-// Actualizar un envío
+
+
 export const updateEntrega = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const updatedEntrega = await entregaService.update(id, req.body);
-        if (!updatedEntrega) {
-            return res.status(404).json({ message: 'Envío no encontrado.' });
-        }
-        return res.status(200).json(updatedEntrega);
-    } catch (error) {
-        console.error('Error en updateEntrega:', error);
-        next(boom.internal(error.message));
-    }
+  try {
+      const { IdInstitutoOK } = req.params;
+      const updatedData = req.body;
+
+      const updatedEntrega = await entregaService.updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+
+      if (!updatedEntrega) {
+          return res.status(404).json({ message: 'Envío no encontrado.' });
+      }
+
+      return res.status(200).json({ 
+          message: 'Envío actualizado exitosamente.', 
+          updatedEntrega 
+      });
+  } catch (error) {
+      console.error('Error en updateEntregaByIdInstitutoOK:', error);
+      next(boom.internal(error.message));
+  }
 };
 
 export const updateProduct = async (req, res, next) => {
