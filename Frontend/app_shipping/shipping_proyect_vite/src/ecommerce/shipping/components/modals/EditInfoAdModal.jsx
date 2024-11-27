@@ -12,6 +12,8 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
     UsuarioReg: "",
   });
 
+  const [errors, setErrors] = useState({}); // Estado para manejar errores
+
   // Inicializa el formulario con los datos de la fila seleccionada
   useEffect(() => {
     if (selectedRow) {
@@ -24,22 +26,45 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
         FechaReg: selectedRow.detail_row?.detail_row_reg?.[0]?.FechaReg || "",
         UsuarioReg: selectedRow.detail_row?.detail_row_reg?.[0]?.UsuarioReg || "",
       });
+      setErrors({}); // Limpia los errores al abrir el modal
     }
   }, [selectedRow]);
 
   // Maneja cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "Valor" && !/^\d*$/.test(value)) {
+      // Filtrar solo números para el campo "Valor"
+      return;
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Limpia el error cuando se cambia el valor
+    }));
+  };
+
+  // Valida los campos del formulario
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.Etiqueta) newErrors.Etiqueta = "La etiqueta es obligatoria.";
+    if (!formData.Valor) newErrors.Valor = "El valor es obligatorio.";
+    if (!formData.Secuencia) newErrors.Secuencia = "La secuencia es obligatoria.";
+    if (!formData.UsuarioReg) newErrors.UsuarioReg = "El usuario registrado es obligatorio.";
+    return newErrors;
   };
 
   // Maneja el envío del formulario
   const handleSubmit = () => {
-    if (!formData.Etiqueta || !formData.Valor || !formData.Secuencia || !formData.UsuarioReg) {
-      alert("Por favor, completa todos los campos obligatorios.");
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -81,6 +106,8 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
             name="Etiqueta"
             value={formData.Etiqueta}
             onChange={handleChange}
+            error={!!errors.Etiqueta}
+            helperText={errors.Etiqueta}
           />
 
           {/* Valor */}
@@ -89,6 +116,8 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
             name="Valor"
             value={formData.Valor}
             onChange={handleChange}
+            error={!!errors.Valor}
+            helperText={errors.Valor}
           />
 
           {/* Secuencia */}
@@ -98,6 +127,8 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
             type="number"
             value={formData.Secuencia}
             onChange={handleChange}
+            error={!!errors.Secuencia}
+            helperText={errors.Secuencia}
           />
 
           {/* Activo */}
@@ -127,6 +158,8 @@ const EditInfoAdModal = ({ open, onClose, onEditInfoAd, selectedRow }) => {
             name="UsuarioReg"
             value={formData.UsuarioReg}
             onChange={handleChange}
+            error={!!errors.UsuarioReg}
+            helperText={errors.UsuarioReg}
           />
         </Stack>
 
