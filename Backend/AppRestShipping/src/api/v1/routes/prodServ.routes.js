@@ -68,6 +68,23 @@ router.delete( "/info-ad/:IdInstitutoOK", entregaController.deleteInfoAdByInstit
 // Nueva ruta para actualizar Info Adicional
 router.put('/info-ad/:IdInstitutoOK', entregaController.updateInfoAdByIdInstituto);
 
+
+//RASTREO
+// Nueva ruta: Obtener todas las IDs de Institutos con su info_ad
+router.get("/info-ad", entregaController.getAllInstitutesInfoAd);
+
+// Ruta para agregar información adicional
+router.post("/info-adicional/:instituteId", entregaController.addInfoAdicional);
+
+// Nueva ruta para eliminar info_ad por IdInstitutoOK
+router.delete( "/info-ad/:IdInstitutoOK", entregaController.deleteInfoAdByInstitute);
+
+// Nueva ruta para actualizar Info Adicional
+router.put('/info-ad/:IdInstitutoOK', entregaController.updateInfoAdByIdInstituto);
+router.put('/rastreos/:IdInstitutoOK/:NumeroGuia', entregaController.updateRastreo);
+
+
+
 //CRUD ENVIOS
 
 // Nueva ruta: Obtener todas las IDs de Institutos con sus envíos

@@ -85,23 +85,25 @@ const entregaSchema = new mongoose.Schema({
                     _id: false
                 }
             ],
-            rastreos: {
-                NumeroGuia: { type: String },
-                IdRepartidorOK: { type: String },
-                NombreRepartidor: { type: String },
-                Alias: { type: String },
-                seguimiento: [
+            rastreos: [
+                {
+                  NumeroGuia: { type: String },
+                  IdRepartidorOK: { type: String },
+                  NombreRepartidor: { type: String },
+                  Alias: { type: String },
+                  seguimiento: [
                     {
-                        Ubicacion: { type: String },
-                        DesUbicacion: { type: String },
-                        Referencias: { type: String },
-                        Observacion: { type: String },
-                        FechaReg: { type: Date },
-                        UsuarioReg: { type: String }
+                      Ubicacion: { type: String },
+                      DesUbicacion: { type: String },
+                      Referencias: { type: String },
+                      Observacion: { type: String },
+                      FechaReg: { type: Date },
+                      UsuarioReg: { type: String }
                     }
-                ],
-                _id: false
-            }
+                  ],
+                  _id: false
+                }
+              ]
         }
     ],
     detail_row: {
