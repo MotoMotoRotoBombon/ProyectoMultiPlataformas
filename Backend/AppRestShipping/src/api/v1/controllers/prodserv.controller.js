@@ -594,3 +594,99 @@ export const createRastreo = async (req, res, next) => {
     res.status(500).json({ message: 'Error interno del servidor.', error: error.message });
   }
 };
+
+// CRUD para la funcionalidad de envíos
+
+// Obtener todas las IDs de Institutos con sus envíos
+export const getAllInstitutesEnvios = async (req, res, next) => {
+  try {
+      const entregas = await Entrega.find({}, { IdInstitutoOK: 1, envios: 1 });
+      if (!entregas || entregas.length === 0) {
+          return res.status(404).json({ message: "No se encontraron envíos registrados." });
+      }
+      return res.status(200).json(entregas);
+  } catch (error) {
+      console.error("Error al obtener las IDs de Institutos con sus envíos:", error);
+      next(error);
+  }
+};
+
+// Agregar un envío para un Instituto específico
+export const addEnvio = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+      const envioData = req.body;
+
+      const entrega = await Entrega.findOne({ IdInstitutoOK });
+      if (!entrega) {
+          return res
+              .status(404)
+              .json({ message: `No se encontró un registro con el ID Instituto: ${IdInstitutoOK}` });
+      }
+
+      entrega.envios.push(envioData);
+      await entrega.save();
+
+      return res.status(201).json({
+          message: "Envío agregado correctamente.",
+          envio: envioData,
+      });
+  } catch (error) {
+      console.error("Error al agregar envío:", error);
+      next(error);
+  }
+};
+
+// Eliminar todos los envíos de un Instituto específico
+export const deleteEnviosByInstitute = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+
+      const entrega = await Entrega.findOneAndUpdate(
+          { IdInstitutoOK },
+          { $set: { envios: [] } },
+          { new: true }
+      );
+
+      if (!entrega) {
+          return res.status(404).json({
+              message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+          });
+      }
+
+      return res.status(200).json({
+          message: "Todos los envíos eliminados correctamente.",
+          updatedEntrega: entrega,
+      });
+  } catch (error) {
+      console.error("Error al eliminar envíos:", error);
+      next(error);
+  }
+};
+
+// Actualizar los envíos de un Instituto específico
+export const updateEnviosByInstitute = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+      const enviosData = req.body;
+
+      const entrega = await Entrega.findOne({ IdInstitutoOK });
+
+      if (!entrega) {
+          return res.status(404).json({
+              message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+          });
+      }
+
+      entrega.envios = enviosData;
+      await entrega.save();
+
+      return res.status(200).json({
+          message: "Envíos actualizados correctamente.",
+          updatedEnvios: entrega.envios,
+      });
+  } catch (error) {
+      console.error("Error al actualizar envíos:", error);
+      next(error);
+  }
+};
