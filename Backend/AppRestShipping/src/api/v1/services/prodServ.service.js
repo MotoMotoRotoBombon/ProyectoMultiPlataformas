@@ -56,6 +56,20 @@ async getInfoAdByIdInstituto(IdInstitutoOK) {
     }
 }
 
+//cambios
+async updateByIdInstitutoOK(IdInstitutoOK, updatedData) {
+    try {
+        // Usamos el método findOneAndUpdate para actualizar el documento por IdInstitutoOK
+        return await Entrega.findOneAndUpdate(
+            { IdInstitutoOK },   // Filtro por IdInstitutoOK
+            { $set: updatedData }, // Datos a actualizar
+            { new: true }          // Devuelve el documento actualizado
+        );
+    } catch (error) {
+        throw error;
+    }
+}
+
 
   
 

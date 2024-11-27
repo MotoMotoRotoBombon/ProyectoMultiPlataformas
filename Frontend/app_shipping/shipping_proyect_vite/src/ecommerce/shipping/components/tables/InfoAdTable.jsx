@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MaterialReactTable } from "material-react-table";
-import { Box, Tooltip, IconButton, Stack } from "@mui/material";
+import { Box, Tooltip, IconButton, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import PlaylistAddCheckIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -37,6 +37,15 @@ const InfoAdTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [notification, setNotification] = useState({ message: "", type: "" });
+
+  // Función para mostrar notificación con temporizador
+  const showNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification({ message: "", type: "" }); // Limpia el mensaje después de 5 segundos
+    }, 1500);
+  };
 
   // Función para cargar toda la tabla de InfoAd
   const fetchAllInfoAd = async () => {
@@ -80,11 +89,17 @@ const InfoAdTable = () => {
         setInfoAdData(processedData);
       } else {
         setInfoAdData([]);
-        alert("No se encontraron resultados para el Instituto especificado.");
+        showNotification(
+          "No se encontraron resultados para el Instituto especificado.",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error al buscar información por IdInstitutoOK:", error);
-      alert("Hubo un error al buscar información. Intenta nuevamente.");
+      showNotification(
+        "Hubo un error al buscar información. Intenta nuevamente.",
+        "error"
+      );
     } finally {
       setLoadingTable(false);
     }
@@ -94,7 +109,7 @@ const InfoAdTable = () => {
   const handleDeleteInfoAd = async () => {
     try {
       if (!selectedRow) {
-        alert("Por favor, selecciona una fila para eliminar.");
+        showNotification("Por favor, selecciona una fila para eliminar.", "error");
         return;
       }
 
@@ -108,12 +123,18 @@ const InfoAdTable = () => {
         prevData.filter((row) => row.IdInstitutoOK !== IdInstitutoOK)
       );
 
-      alert(`Información adicional del Instituto ${IdInstitutoOK} eliminada correctamente.`);
+      showNotification(
+        `Información adicional del Instituto ${IdInstitutoOK} eliminada correctamente.`,
+        "success"
+      );
       setSelectedRow(null);
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Error al eliminar Info Adicional:", error);
-      alert("Hubo un error al eliminar la información. Intenta nuevamente.");
+      showNotification(
+        "Hubo un error al eliminar la información. Intenta nuevamente.",
+        "error"
+      );
     }
   };
 
@@ -124,12 +145,15 @@ const InfoAdTable = () => {
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/info-ad/${updatedData.IdInstitutoOK}`,
         updatedData
       );
-      alert("Información adicional actualizada correctamente.");
+      showNotification("Información adicional actualizada correctamente.", "success");
       fetchAllInfoAd(); // Recargar los datos
       setIsEditModalOpen(false); // Cerrar el modal
     } catch (error) {
       console.error("Error al actualizar información adicional:", error);
-      alert("Hubo un error al actualizar la información. Intenta nuevamente.");
+      showNotification(
+        "Hubo un error al actualizar la información. Intenta nuevamente.",
+        "error"
+      );
     }
   };
 
@@ -140,6 +164,23 @@ const InfoAdTable = () => {
 
   return (
     <Box>
+      {/* Mensaje de notificación */}
+      {notification.message && (
+        <Typography
+          sx={{
+            mb: 2,
+            p: 1,
+            borderRadius: 1,
+            textAlign: "center",
+            backgroundColor:
+              notification.type === "success" ? "#d4edda" : "#f8d7da",
+            color: notification.type === "success" ? "#155724" : "#721c24",
+          }}
+        >
+          {notification.message}
+        </Typography>
+      )}
+
       {/* Modal de eliminación */}
       <DeleteShippingModal
         open={isDeleteModalOpen}

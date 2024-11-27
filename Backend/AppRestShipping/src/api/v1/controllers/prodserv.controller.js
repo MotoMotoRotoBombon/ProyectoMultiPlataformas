@@ -46,19 +46,27 @@ export const createEntrega = async (req, res, next) => {
     }
 };
 
-// Actualizar un envío
+
+
 export const updateEntrega = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const updatedEntrega = await entregaService.update(id, req.body);
-        if (!updatedEntrega) {
-            return res.status(404).json({ message: 'Envío no encontrado.' });
-        }
-        return res.status(200).json(updatedEntrega);
-    } catch (error) {
-        console.error('Error en updateEntrega:', error);
-        next(boom.internal(error.message));
-    }
+  try {
+      const { IdInstitutoOK } = req.params;
+      const updatedData = req.body;
+
+      const updatedEntrega = await entregaService.updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+
+      if (!updatedEntrega) {
+          return res.status(404).json({ message: 'Envío no encontrado.' });
+      }
+
+      return res.status(200).json({ 
+          message: 'Envío actualizado exitosamente.', 
+          updatedEntrega 
+      });
+  } catch (error) {
+      console.error('Error en updateEntregaByIdInstitutoOK:', error);
+      next(boom.internal(error.message));
+  }
 };
 
 export const updateProduct = async (req, res, next) => {
@@ -355,32 +363,43 @@ export const getRastreosByInstituto = async (req, res, next) => {
   };
 
   // Obtener todos los rastreos de todos los institutos
-export const getAllRastreos = async (req, res, next) => {
-  try {
-    // Buscar todos los registros que contengan rastreos
-    const envios = await Entrega.find(
-      { "envios.rastreos": { $exists: true } }, // Filtra registros que tengan rastreos
-      {
-        IdInstitutoOK: 1, // Incluye IdInstitutoOK
-        "envios.rastreos": 1, // Incluye solo los rastreos dentro de envios
+  export const getAllRastreos = async (req, res, next) => {
+    try {
+      const envios = await Entrega.find(
+        { "envios.rastreos": { $exists: true } },
+        {
+          IdInstitutoOK: 1,
+          "envios.rastreos": 1,
+        }
+      );
+  
+      // Verifica que `envios` sea un array válido
+      if (!envios || envios.length === 0) {
+        return res.status(404).json({ message: "No se encontraron rastreos." });
       }
-    );
-
-    // Formatear la respuesta para incluir IdInstitutoOK y los rastreos
-    const rastreosData = envios.map((entrega) => ({
-      IdInstitutoOK: entrega.IdInstitutoOK,
-      rastreos: entrega.envios
-        .filter((envio) => envio.rastreos) // Filtra envíos que tengan rastreos
-        .map((envio) => envio.rastreos), // Obtén solo los rastreos
-    }));
-
-    res.status(200).json(rastreosData);
-  } catch (error) {
-    console.error("Error al obtener todos los rastreos:", error);
-    next(error);
-  }
-
-};
+  
+      // Genera un array plano donde cada rastreo es un objeto único
+      const rastreosData = envios.flatMap((entrega) =>
+        (entrega.envios || []).flatMap((envio) => {
+          const rastreos = Array.isArray(envio.rastreos) ? envio.rastreos : [envio.rastreos].filter(Boolean);
+  
+          return rastreos.map((rastreo) => ({
+            IdInstitutoOK: entrega.IdInstitutoOK,
+            NumeroGuia: rastreo?.NumeroGuia || "Sin número de guía",
+            IdRepartidorOK: rastreo?.IdRepartidorOK || "Sin ID de repartidor",
+            NombreRepartidor: rastreo?.NombreRepartidor || "Sin nombre de repartidor",
+            Alias: rastreo?.Alias || "Sin alias",
+          }));
+        })
+      );
+  
+      console.log("Datos de rastreos procesados y enviados al cliente:", rastreosData); // Para depuración
+      res.status(200).json(rastreosData);
+    } catch (error) {
+      console.error("Error al obtener todos los rastreos:", error);
+      next(error);
+    }
+  };
 
 //CRUD INFO ADD
 //ADD 
@@ -500,5 +519,204 @@ export const updateInfoAdByIdInstituto = async (req, res, next) => {
   } catch (error) {
     console.error("Error al actualizar información adicional:", error);
     next(error);
+  }
+};
+
+
+
+
+//APARTADO DE RASTREO
+export const createRastreo = async (req, res, next) => {
+  try {
+    const {
+      IdInstitutoOK,
+      NumeroGuia,
+      IdRepartidorOK,
+      NombreRepartidor,
+      Alias,
+      Ubicacion,
+      FechaRegistro,
+      UsuarioRegistro,
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (
+      !IdInstitutoOK ||
+      !NumeroGuia ||
+      !IdRepartidorOK ||
+      !NombreRepartidor ||
+      !Alias ||
+      !Ubicacion ||
+      !FechaRegistro ||
+      !UsuarioRegistro
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    // Crear el nuevo rastreo
+    const nuevoRastreo = {
+      NumeroGuia,
+      IdRepartidorOK,
+      NombreRepartidor,
+      Alias,
+      Ubicacion,
+      FechaRegistro,
+      UsuarioRegistro,
+    };
+
+    // Verificar si existe el documento y que `envios` no esté vacío
+    const instituto = await Entrega.findOne({ IdInstitutoOK });
+
+    if (!instituto) {
+      return res
+        .status(404)
+        .json({ message: `No se encontró el instituto con IdInstitutoOK: ${IdInstitutoOK}` });
+    }
+
+    // Si `envios` está vacío, agregar un objeto base
+    if (instituto.envios.length === 0) {
+      await Entrega.updateOne(
+        { IdInstitutoOK },
+        { $push: { envios: { rastreos: [] } } }
+      );
+    }
+
+    // Ahora agregar el nuevo rastreo al primer objeto de `envios`
+    const resultado = await Entrega.updateOne(
+      { IdInstitutoOK, 'envios.0': { $exists: true } }, // Buscar que exista al menos un objeto en `envios`
+      { $push: { 'envios.0.rastreos': nuevoRastreo } }
+    );
+
+    // Verificar si se modificó el documento
+    if (!resultado.modifiedCount) {
+      return res
+        .status(500)
+        .json({ message: 'No se pudo agregar el rastreo.' });
+    }
+
+    res.status(201).json({ message: 'Rastreo creado con éxito.', data: nuevoRastreo });
+  } catch (error) {
+    console.error('Error en createRastreo:', error);
+    res.status(500).json({ message: 'Error interno del servidor.', error: error.message });
+  }
+};
+
+// CRUD para la funcionalidad de envíos
+
+// Obtener todas las IDs de Institutos con sus envíos
+export const getAllInstitutesEnvios = async (req, res, next) => {
+  try {
+      const entregas = await Entrega.find({}, { IdInstitutoOK: 1, envios: 1 });
+      if (!entregas || entregas.length === 0) {
+          return res.status(404).json({ message: "No se encontraron envíos registrados." });
+      }
+      return res.status(200).json(entregas);
+  } catch (error) {
+      console.error("Error al obtener las IDs de Institutos con sus envíos:", error);
+      next(error);
+  }
+};
+
+// Agregar un envío para un Instituto específico
+export const addEnvio = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+      const envioData = req.body;
+
+      const entrega = await Entrega.findOne({ IdInstitutoOK });
+      if (!entrega) {
+          return res
+              .status(404)
+              .json({ message: `No se encontró un registro con el ID Instituto: ${IdInstitutoOK}` });
+      }
+
+      entrega.envios.push(envioData);
+      await entrega.save();
+
+      return res.status(201).json({
+          message: "Envío agregado correctamente.",
+          envio: envioData,
+      });
+  } catch (error) {
+      console.error("Error al agregar envío:", error);
+      next(error);
+  }
+};
+
+// Eliminar todos los envíos de un Instituto específico
+export const deleteEnviosByInstitute = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+
+      const entrega = await Entrega.findOneAndUpdate(
+          { IdInstitutoOK },
+          { $set: { envios: [] } },
+          { new: true }
+      );
+
+      if (!entrega) {
+          return res.status(404).json({
+              message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+          });
+      }
+
+      return res.status(200).json({
+          message: "Todos los envíos eliminados correctamente.",
+          updatedEntrega: entrega,
+      });
+  } catch (error) {
+      console.error("Error al eliminar envíos:", error);
+      next(error);
+  }
+};
+
+// Actualizar los envíos de un Instituto específico
+export const updateEnviosByInstitute = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params;
+      const enviosData = req.body;
+
+      const entrega = await Entrega.findOne({ IdInstitutoOK });
+
+      if (!entrega) {
+          return res.status(404).json({
+              message: `No se encontró información para el Instituto con ID: ${IdInstitutoOK}`,
+          });
+      }
+
+      entrega.envios = enviosData;
+      await entrega.save();
+
+      return res.status(200).json({
+          message: "Envíos actualizados correctamente.",
+          updatedEnvios: entrega.envios,
+      });
+  } catch (error) {
+      console.error("Error al actualizar envíos:", error);
+      next(error);
+  }
+};
+
+//CHECHO
+export const updateEntregaByIdInstitutoOK = async (req, res, next) => {
+  try {
+      const { IdInstitutoOK } = req.params; // Obtiene el parámetro de la URL
+      const updatedData = req.body; // Obtiene los datos a actualizar del cuerpo de la solicitud
+
+      const updatedEntrega = await entregaService.updateByIdInstitutoOK(IdInstitutoOK, updatedData);
+
+      if (!updatedEntrega) {
+          return res.status(404).json({ message: 'Envío no encontrado.' });
+      }
+
+      return res.status(200).json({ 
+          message: 'Envío actualizado exitosamente.', 
+          updatedEntrega 
+      });
+  } catch (error) {
+      console.error('Error en updateEntregaByIdInstitutoOK:', error);
+      next(boom.internal(error.message)); // Manejo de errores
   }
 };

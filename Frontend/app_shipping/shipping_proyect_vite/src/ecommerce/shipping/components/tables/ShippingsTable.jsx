@@ -8,6 +8,8 @@ import {
   Menu,
   MenuItem,
   Typography,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -17,8 +19,11 @@ import AddShippingModal from "../modals/AddShippingModal";
 import DeleteShippingModal from "../modals/DeleteShippingModal";
 import EditShippingModal from "../modals/EditShippingModal";
 import AddInfoAdicional from "../modals/AddInfoAdicionalModal";
+import AddTrackingModal from "../modals/AddTrackingModal "; // Importar modal de rastreo
+import AddEnviosModal from "../modals/AddEnviosModal";
 import { deleteShipping } from "../../services/remote/del/DeleteShipping";
 import { getAllShippings } from "../../services/remote/get/GetAllShippings";
+import { editShipping } from "../../services/remote/put/EditShipping";
 
 const ShippingColumns = [
   { accessorKey: "IdInstitutoOK", header: "ID Instituto", size: 200 },
@@ -34,10 +39,19 @@ const ShippingsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddInfoAdModalOpen, setIsAddInfoAdModalOpen] = useState(false);
+  const [isAddTrackingModalOpen, setIsAddTrackingModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [contextMenu, setContextMenu] = useState(null); // Controlador para el menú contextual
+  const [contextMenu, setContextMenu] = useState(null);
+  const [enviosData, setEnviosData] = useState([]);
+  const [isAddEnviosModalOpen, setIsAddEnviosModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "" });
+  
+  
+  
+  // Cargar datos desde el backend
 
+  
   // Cargar datos desde el backend
   const loadShippingsData = async () => {
     setLoading(true);
@@ -46,7 +60,7 @@ const ShippingsTable = () => {
       setShippingsData(data);
     } catch (error) {
       console.error("Error al cargar los datos de envíos:", error);
-      alert("Error al cargar los datos. Por favor, intenta nuevamente.");
+      showSnackbar("Error al cargar los datos. Por favor, intenta nuevamente.", "error");
     } finally {
       setLoading(false);
     }
@@ -63,7 +77,7 @@ const ShippingsTable = () => {
 
   const handleDeleteShipping = async () => {
     if (!selectedRow) {
-      alert("Por favor, selecciona una fila antes de eliminar.");
+      showSnackbar("Por favor, selecciona una fila antes de eliminar.", "warning");
       return;
     }
 
@@ -76,36 +90,36 @@ const ShippingsTable = () => {
       );
       setSelectedRow(null);
       setIsDeleteModalOpen(false);
-      alert("Envío eliminado correctamente.");
+      showSnackbar("Envío eliminado correctamente.", "success");
     } catch (error) {
       console.error("Error al eliminar el envío:", error);
-      alert(
-        error.response?.data?.message || "Ocurrió un error al eliminar el envío."
-      );
+      showSnackbar("Ocurrió un error al eliminar el envío.", "error");
     }
   };
 
   const handleEdit = async (updatedShipping) => {
     try {
-      const updatedData = await updateShipping(
+      const updatedData = await editShipping(
         updatedShipping.IdInstitutoOK,
         updatedShipping
       );
       setShippingsData((prevData) =>
         prevData.map((row) =>
-          row.IdInstitutoOK === updatedData.IdInstitutoOK
-            ? updatedData
-            : row
+          row.IdInstitutoOK === updatedData.IdInstitutoOK ? updatedData : row
         )
       );
       setIsEditModalOpen(false);
-      alert("Envío actualizado correctamente.");
+      loadShippingsData();
+      showSnackbar("Envío actualizado correctamente.", "success");
     } catch (error) {
       console.error("Error al actualizar el envío:", error);
-      alert(
-        error.response?.data?.message || "Ocurrió un error al actualizar el envío."
-      );
+      showSnackbar("Ocurrió un error al actualizar el envío.", "error");
     }
+  };
+
+  const handleAddTracking = (newTracking) => {
+    showSnackbar(`Nuevo rastreo agregado para el instituto ${selectedRow?.IdInstitutoOK}`, "success");
+    loadShippingsData();
   };
 
   const rowSelectionHandler = (row) => {
@@ -114,7 +128,7 @@ const ShippingsTable = () => {
 
   const handleContextMenu = (event, row) => {
     event.preventDefault();
-    setSelectedRow(row.original); // Establecer la fila seleccionada
+    setSelectedRow(row.original);
     setContextMenu(
       contextMenu === null
         ? {
@@ -140,13 +154,13 @@ const ShippingsTable = () => {
   };
 
   const handleAddEnvios = () => {
-    alert(`Agregar Envíos para: ${selectedRow.IdInstitutoOK}`);
+    setIsAddEnviosModalOpen(true);
     handleCloseContextMenu();
   };
 
-  const handleAddRastreo = () => {
-    alert(`Agregar Rastreo para: ${selectedRow.IdInstitutoOK}`);
-    handleCloseContextMenu();
+  const showSnackbar = (message, severity) => {
+    setSnackbar({ open: true, message, severity });
+    setTimeout(() => setSnackbar({ open: false, message: "", severity: "" }), 3000);
   };
 
   return (
@@ -177,9 +191,34 @@ const ShippingsTable = () => {
         IdInstitutoOK={selectedRow?.IdInstitutoOK}
         onInfoAdAdded={(newInfoAd) => {
           console.log("Información adicional agregada:", newInfoAd);
-          loadShippingsData(); // Recargar datos
+          loadShippingsData();
         }}
       />
+
+      <AddEnviosModal
+        open={isAddEnviosModalOpen}
+        onClose={() => setIsAddEnviosModalOpen(false)}
+        IdInstitutoOK={selectedRow?.IdInstitutoOK}
+        enviosData={enviosData}
+        onEnvioAdded={(newEnvio) => {
+          setEnviosData((prevData) => [...prevData, newEnvio]);
+          console.log("Envío agregado:", newEnvio);
+          loadShippingsData();
+        }}
+      />
+
+      <AddTrackingModal
+        open={isAddTrackingModalOpen}
+        onClose={() => setIsAddTrackingModalOpen(false)}
+        onAddTracking={handleAddTracking}
+        instituteId={selectedRow?.IdInstitutoOK}
+      />
+
+      <Snackbar open={snackbar.open} autoHideDuration={3000}>
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
       <MaterialReactTable
         columns={ShippingColumns}
@@ -248,7 +287,6 @@ const ShippingsTable = () => {
         <MenuItem onClick={handleAddInfoAdicional}>Agregar Info Adicional</MenuItem>
         <MenuItem onClick={handleAddProductos}>Agregar Productos</MenuItem>
         <MenuItem onClick={handleAddEnvios}>Agregar Envíos</MenuItem>
-        <MenuItem onClick={handleAddRastreo}>Agregar Rastreo</MenuItem>
       </Menu>
     </Box>
   );

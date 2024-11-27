@@ -1,6 +1,7 @@
 // Shipping
 import { Router } from 'express';
 import * as entregaController from '../controllers/prodserv.controller';
+import { validateRastreo } from "../middlewares/validateRastreo";
 const router = Router();
 
 // Ruta para obtener la lista de todos los envíos
@@ -47,6 +48,9 @@ router.get("/rastreos/instituto/:IdInstitutoOK", entregaController.getRastreosBy
 // Nueva ruta: Obtener todos los rastreos
 router.get("/instituto/rastreos", entregaController.getAllRastreos);
 
+router.get("/rastreos", entregaController.getAllRastreos);
+
+router.post('/rastreos', entregaController.createRastreo);
 //CRUD INFO 
 router.put("/productos/:IdProdServOK", entregaController.updateProduct);
 
@@ -64,6 +68,21 @@ router.delete( "/info-ad/:IdInstitutoOK", entregaController.deleteInfoAdByInstit
 // Nueva ruta para actualizar Info Adicional
 router.put('/info-ad/:IdInstitutoOK', entregaController.updateInfoAdByIdInstituto);
 
+//CRUD ENVIOS
+
+// Nueva ruta: Obtener todas las IDs de Institutos con sus envíos
+router.get("/envios", entregaController.getAllInstitutesEnvios);
+
+// Nueva ruta: Agregar un envío para un Instituto específico
+router.post("/envios/:IdInstitutoOK", entregaController.addEnvio);
+
+// Nueva ruta: Eliminar todos los envíos de un Instituto específico
+router.delete("/envios/:IdInstitutoOK", entregaController.deleteEnviosByInstitute);
+
+// Nueva ruta: Actualizar envíos de un Instituto específico
+router.put("/envios/:IdInstitutoOK", entregaController.updateEnviosByInstitute);
+
+router.put("/FIC/:IdInstitutoOK", entregaController.updateEntregaByIdInstitutoOK);
   
 
 
