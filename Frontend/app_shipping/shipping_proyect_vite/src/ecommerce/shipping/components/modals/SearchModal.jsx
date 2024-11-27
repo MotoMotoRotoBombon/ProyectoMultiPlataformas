@@ -35,7 +35,7 @@ const SearchModal = ({ open, onClose, onSearch }) => {
           width: 400,
         }}
       >
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom  color="Black"> 
           Buscar  por Instituto
         </Typography>
         <TextField
