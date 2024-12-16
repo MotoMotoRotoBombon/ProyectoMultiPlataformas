@@ -29,31 +29,27 @@ const TrackingTable = () => {
 
   // Función para mostrar notificación con temporizador
   const showNotification = (message, type) => {
-    setNotification({ message, type });
+    setNotification({ message, type }); // Establece el mensaje y el tipo (éxito/error).
     setTimeout(() => {
-      setNotification({ message: "", type: "" }); // Limpia el mensaje después de 5 segundos
+      setNotification({ message: "", type: "" }); // Limpia la notificación después de 1.5 segundos.
     }, 1500);
   };
+  
 
-  // Función para cargar todos los rastreos
   const fetchAllTrackings = async () => {
     try {
-      setLoadingTable(true);
+      setLoadingTable(true); // Activa el indicador de carga para mostrar al usuario que se está cargando la tabla.
       const response = await axios.get(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/instituto/rastreos`
       );
-      if (response.data) {
-        setTrackingData(response.data);
-      } else {
-        setTrackingData([]);
-      }
+      setTrackingData(response.data || []); // Si hay datos, actualiza el estado; si no, usa un arreglo vacío.
     } catch (error) {
-      console.error("Error al cargar los rastreos:", error);
+      console.error("Error al cargar los rastreos:", error); // Registra un error en caso de fallos.
     } finally {
-      setLoadingTable(false);
+      setLoadingTable(false); // Desactiva el indicador de carga.
     }
   };
-
+  
   // Función para buscar rastreos por Instituto
   const handleSearchByInstitute = async (instituteId) => {
     try {
@@ -84,67 +80,61 @@ const TrackingTable = () => {
   // Función para editar un rastreo
   const handleEditTracking = async (formData) => {
     try {
-      const { IdInstitutoOK, NumeroGuia } = formData;
+      const { IdInstitutoOK, NumeroGuia } = formData; // Obtiene identificadores clave del formulario.
   
       const response = await axios.put(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/rastreos/${IdInstitutoOK}/${NumeroGuia}`,
-        formData
+        formData // Envía los datos del formulario al servidor.
       );
   
-      console.log("Respuesta del servidor:", response.data);
-  
-      // Actualizar la tabla con los nuevos datos
+      // Actualiza los datos de la tabla localmente para evitar recargar toda la tabla.
       setTrackingData((prevData) =>
         prevData.map((row) =>
           row.NumeroGuia === NumeroGuia && row.IdInstitutoOK === IdInstitutoOK
-            ? { ...row, ...formData }
+            ? { ...row, ...formData } // Aplica los cambios si coincide con el rastreo editado.
             : row
         )
       );
   
-      alert("Rastreo actualizado correctamente.");
+      showNotification("Rastreo actualizado correctamente.", "success"); // Notifica al usuario que la operación fue exitosa.
     } catch (error) {
-      console.error("Error al actualizar el rastreo:", error.response || error.message);
-      alert("Hubo un problema al actualizar el rastreo. Intenta nuevamente.");
+      console.error("Error al actualizar el rastreo:", error); // Registra el error.
+      showNotification("Hubo un problema al actualizar el rastreo. Intenta nuevamente.", "error"); // Informa al usuario.
     }
   };
   
   
   
 
-  // Función para eliminar un rastreo
   const handleDeleteTracking = async () => {
     try {
       if (!selectedRow) {
-        showNotification("Por favor, selecciona un rastreo para eliminar.", "error");
+        showNotification("Por favor, selecciona un rastreo para eliminar.", "error"); // Verifica que hay un rastreo seleccionado.
         return;
       }
-
+  
       const { IdInstitutoOK, NumeroGuia } = selectedRow;
-
+  
       await axios.delete(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/rastreos/${IdInstitutoOK}/${NumeroGuia}`
       );
-      
-
+  
+      // Filtra el rastreo eliminado del estado local.
       setTrackingData((prevData) =>
         prevData.filter(
           (row) =>
             row.IdInstitutoOK !== IdInstitutoOK || row.NumeroGuia !== NumeroGuia
         )
       );
-
+  
       showNotification("Rastreo eliminado correctamente.", "success");
-      setSelectedRow(null);
-      setIsDeleteModalOpen(false);
+      setSelectedRow(null); // Deselecciona la fila eliminada.
     } catch (error) {
-      console.error("Error al eliminar rastreo:", error);
-      showNotification(
-        "Hubo un error al eliminar el rastreo. Intenta nuevamente.",
-        "error"
-      );
+      console.error("Error al eliminar rastreo:", error); // Registra el error.
+      showNotification("Hubo un error al eliminar el rastreo. Intenta nuevamente.", "error"); // Notifica al usuario.
     }
   };
+  
 
   useEffect(() => {
     fetchAllTrackings();
@@ -195,16 +185,17 @@ const TrackingTable = () => {
         data={trackingData}
         state={{ isLoading: loadingTable }}
         muiTableBodyRowProps={({ row }) => ({
-          onClick: () => setSelectedRow(row.original),
+          onClick: () => setSelectedRow(row.original), // Establece la fila seleccionada en el estado.
           style: {
             backgroundColor:
               selectedRow?.IdInstitutoOK === row.original.IdInstitutoOK &&
               selectedRow?.NumeroGuia === row.original.NumeroGuia
-                ? "#d1e7ff"
+                ? "#d1e7ff" // Cambia el fondo si es la fila seleccionada.
                 : "white",
-            cursor: "pointer",
+            cursor: "pointer", // Indica que la fila es interactiva.
           },
         })}
+        
         renderTopToolbarCustomActions={() => (
           <Stack direction="row" spacing={2}>
             <Tooltip title="Buscar por Instituto">

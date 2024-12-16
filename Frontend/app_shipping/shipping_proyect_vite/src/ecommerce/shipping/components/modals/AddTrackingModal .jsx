@@ -51,28 +51,15 @@ const AddTrackingModal = ({ open, onClose, onAddTracking, instituteId }) => {
         throw new Error("El ID del instituto es obligatorio.");
       }
   
-      console.log("Institute ID recibido:", instituteId); // Verificar que el ID del instituto llegue correctamente
-  
-      const payload = {
-        NumeroGuia: formData.NumeroGuia,
-        IdRepartidorOK: formData.IdRepartidorOK,
-        NombreRepartidor: formData.NombreRepartidor,
-        Alias: formData.Alias,
-        Ubicacion: formData.Ubicacion,
-        FechaRegistro: formData.FechaRegistro,
-        UsuarioRegistro: formData.UsuarioRegistro,
-        IdInstitutoOK: instituteId,
-      };
-  
+      const payload = { ...formData, IdInstitutoOK: instituteId };
       const response = await axios.post(
         `${import.meta.env.VITE_REST_API_ECOMMERCE}entregas/rastreos`,
         payload
       );
   
       if (response.status === 201) {
-        console.log("Respuesta del servidor:", response.data); // Verificar la respuesta del servidor
-        onAddTracking(response.data);
-        setSuccessMessage(true);
+        onAddTracking(response.data); // Agrega el nuevo rastreo al estado principal.
+        setSuccessMessage(true); // Muestra notificación de éxito.
         setFormData({
           NumeroGuia: "",
           IdRepartidorOK: "",
@@ -82,14 +69,13 @@ const AddTrackingModal = ({ open, onClose, onAddTracking, instituteId }) => {
           FechaRegistro: formatDateTimeLocal(new Date()),
           UsuarioRegistro: "",
         });
-        onClose();
+        onClose(); // Cierra el modal.
       } else {
         throw new Error("Respuesta inesperada del servidor.");
       }
     } catch (error) {
-      console.error("Error al guardar el rastreo:", error);
       setErrorDetails(error.response?.data?.message || error.message);
-      setErrorMessage(true);
+      setErrorMessage(true); // Muestra la notificación de error.
     }
   };
   
@@ -171,7 +157,6 @@ const AddTrackingModal = ({ open, onClose, onAddTracking, instituteId }) => {
                 </Button>
               </span>
             </Tooltip>
-
           </Stack>
         </Box>
       </Modal>

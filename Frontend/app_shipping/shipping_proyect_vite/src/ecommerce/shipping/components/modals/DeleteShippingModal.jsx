@@ -14,7 +14,8 @@ const DeleteShippingModal = ({
       return;
     }
     onDelete(); // Llama a la función de eliminación directamente
-    onClose();
+    onClose(); // Cierra el modal después de la eliminación
+    
   };
 
   return (

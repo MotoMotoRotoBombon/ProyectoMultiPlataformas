@@ -544,19 +544,39 @@ export const createRastreo = async (req, res) => {
       UsuarioRegistro,
     } = req.body;
 
-    if (
-      !IdInstitutoOK ||
-      !NumeroGuia ||
-      !IdRepartidorOK ||
-      !NombreRepartidor ||
-      !Ubicacion ||
-      !UsuarioRegistro
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Todos los campos son obligatorios." });
+    // Validar campos obligatorios
+    if (!IdInstitutoOK || !NumeroGuia || !IdRepartidorOK || !NombreRepartidor || !UsuarioRegistro) {
+      return res.status(400).json({
+        message: "Faltan campos obligatorios.",
+      });
     }
 
+    // Buscar el instituto
+    const instituto = await Entrega.findOne({ IdInstitutoOK });
+
+    if (!instituto) {
+      return res.status(404).json({
+        message: `No se encontró el instituto con IdInstitutoOK: ${IdInstitutoOK}`,
+      });
+    }
+
+    // Verificar si el campo envios es un array; si no, inicializarlo
+    if (!Array.isArray(instituto.envios)) {
+      instituto.envios = [];
+    }
+
+    // Si no hay envíos, crear un envío inicial
+    if (instituto.envios.length === 0) {
+      instituto.envios.push({
+        IdDomicilioOK: "Default",
+        IdPaqueteriaOK: "Default",
+        IdTipoMetodoEnvio: "Default",
+        CostoEnvio: 0,
+        rastreos: [],
+      });
+    }
+
+    // Preparar nuevo rastreo
     const nuevoRastreo = {
       NumeroGuia,
       IdRepartidorOK,
@@ -571,43 +591,29 @@ export const createRastreo = async (req, res) => {
       ],
     };
 
-    const instituto = await Entrega.findOne({ IdInstitutoOK });
+    // Agregar el rastreo al primer envío
+    instituto.envios[0].rastreos.push(nuevoRastreo);
 
-    if (!instituto) {
-      return res.status(404).json({
-        message: `No se encontró el instituto con IdInstitutoOK: ${IdInstitutoOK}`,
-      });
-    }
-
-    if (!Array.isArray(instituto.envios) || instituto.envios.length === 0) {
-      return res.status(400).json({
-        message: `No se encontraron envíos para el instituto con IdInstitutoOK: ${IdInstitutoOK}`,
-      });
-    }
-
-    // Asegúrate de que `rastreos` es un array
-    const envio = instituto.envios[0];
-    if (!Array.isArray(envio.rastreos)) {
-      envio.rastreos = [];
-    }
-
-    // Agregar el nuevo rastreo al array de rastreos
-    envio.rastreos.push(nuevoRastreo);
-
+    // Guardar cambios en la base de datos
     await instituto.save();
-
+    debugger;
     res.status(201).json({
       message: "Rastreo creado con éxito.",
       data: nuevoRastreo,
     });
   } catch (error) {
-    console.error("Error en createRastreo:", error.message, error.stack);
+    console.error("Error en createRastreo:", error.message);
     res.status(500).json({
       message: "Error interno del servidor.",
       error: error.message,
     });
   }
 };
+
+
+
+
+
 
 
 //UPDATE
