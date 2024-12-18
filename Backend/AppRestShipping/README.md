@@ -18,7 +18,7 @@ Clona este repositorio en tu máquina local usando el siguiente comando:
 ### ```bash
 git clone <URL_DEL_REPOSITORIO>
 # Accede al directorio del proyecto clonado:
-cd apprestshipping
+cd AppRestShipping
 # Instala todas las dependencias necesarias:
 npm install
 
